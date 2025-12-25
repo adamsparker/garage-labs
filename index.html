@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adele Labs | Studio Editor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+
+        :root {
+            --bg: #080808;
+            --panel: #111111;
+            --accent: #a78bfa;
+            --text: #f1f5f9;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        .light-mode {
+            --bg: #f1f5f9;
+            --panel: #ffffff;
+            --accent: #6366f1;
+            --text: #0f172a;
+            --border: rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .bokeh-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            filter: blur(80px);
+            opacity: 0.4;
+        }
+        .bokeh-ball {
+            position: absolute;
+            width: 30vw;
+            height: 30vw;
+            border-radius: 50%;
+            background: var(--accent);
+            top: -10%;
+            left: -10%;
+            animation: float 15s infinite alternate;
+        }
+
+        @keyframes float {
+            from { transform: translate(0, 0); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        .glass-panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* --- EDITOR STYLES --- */
+        #editor-container {
+            position: relative;
+            font-family: 'JetBrains Mono', monospace;
+            width: 100%;
+            height: 100%;
+        }
+
+        #real-editor {
+            width: 100%;
+            height: 100%;
+            padding: 24px;
+            font-size: 14px;
+            line-height: 1.6;
+            font-family: 'JetBrains Mono', monospace !important;
+            tab-size: 4;
+            white-space: pre;
+            background: transparent;
+            color: var(--text);
+            border: none;
+            outline: none;
+            resize: none;
+            caret-color: var(--accent);
+            box-sizing: border-box;
+            overflow-wrap: normal;
+            word-wrap: normal;
+            word-break: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        #real-editor::-webkit-scrollbar { width: 6px; }
+        #real-editor::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .ai-glow-btn {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            background: rgba(167, 139, 250, 0.05);
+            transition: all 0.3s ease;
+        }
+        .ai-glow-btn:hover { background: rgba(167, 139, 250, 0.15); box-shadow: 0 0 20px rgba(167, 139, 250, 0.2); }
+
+        .save-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .save-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--accent); }
+
+        /* TAB STYLES */
+        .tab-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text);
+            opacity: 0.6;
+            transition: all 0.2s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            opacity: 1;
+            background: rgba(167, 139, 250, 0.1);
+            border-color: rgba(167, 139, 250, 0.3);
+        }
+
+        .tab-btn:hover:not(.active) {
+            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* MOBILE OPTIMIZATION */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            nav {
+                height: 60px;
+                padding: 0 16px;
+            }
+
+            nav .flex.space-x-3 {
+                gap: 8px;
+            }
+
+            .ai-glow-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .save-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .grid-layout {
+                grid-template-columns: 1fr;
+                padding: 16px;
+                gap: 16px;
+                height: auto;
+                min-height: calc(100vh - 60px);
+            }
+
+            .glass-panel {
+                height: 400px;
+                min-height: 400px;
+            }
+
+            #real-editor {
+                padding: 16px;
+                font-size: 13px;
+                line-height: 1.5;
+            }
+
+            .tab-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            #current-file {
+                font-size: 10px;
+            }
+
+            .mobile-stack {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .mobile-stack .flex.space-x-2 {
+                align-self: flex-end;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .glass-panel {
+                height: 350px;
+                min-height: 350px;
+            }
+
+            nav .hidden.md\\:block {
+                display: none;
+            }
+
+            .ai-glow-btn span:last-child {
+                display: none;
+            }
+
+            .ai-glow-btn {
+                padding: 8px;
+                min-width: 40px;
+                justify-content: center;
+            }
+
+            .save-btn span:last-child {
+                display: none;
+            }
+
+            .save-btn {
+                padding: 8px;
+                min-width: 40px;
+                justify-content: center;
+            }
+
+            .tab-btn {
+                padding: 5px 8px;
+                font-size: 10px;
+            }
+
+            #real-editor {
+                font-size: 12px;
+            }
+        }
+
+        /* FIX FOR CURSOR AND TEXT ISSUES */
+        .editor-wrapper {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #real-editor:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="bokeh-container"><div class="bokeh-ball"></div></div>
+
+    <nav class="h-20 flex items-center justify-between px-4 md:px-8 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md z-50">
+        <div class="flex items-center space-x-4 md:space-x-6">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center font-bold text-sm md:text-base">A</div>
+            <div class="hidden md:block">
+                <p class="text-sm font-semibold tracking-wide">Garage Labs</p>
+                <p class="text-[10px] opacity-40 uppercase tracking-[0.2em]">Build Mode v2.0</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2 md:space-x-3">
+            <button onclick="toggleTheme()" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/10">
+                <svg id="theme-icon" class="w-4 h-4 md:w-5 md:h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+            
+            <button id="manual-save-btn" onclick="manualSave()" class="save-btn px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex items-center space-x-1 md:space-x-2">
+                <svg class="w-3 h-3 md:w-4 md:h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                </svg>
+                <span class="hidden md:inline">Save</span>
+            </button>
+
+            <button onclick="openAiModal()" class="ai-glow-btn px-3 py-2 md:px-5 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex items-center space-x-1 md:space-x-3">
+                <svg class="w-3 h-3 md:w-4 md:h-4 text-purple-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+                <span class="hidden md:inline">AI Assistant</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="grid-layout grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 md:p-6 h-[calc(100vh-80px)] md:h-[calc(100vh-80px)]">
+        <div class="flex flex-col h-full">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-3 px-2 gap-2">
+                <div class="flex items-center space-x-2 md:space-x-4 w-full md:w-auto">
+                    <div class="flex space-x-1 overflow-x-auto">
+                        <button class="tab-btn active" data-file="html">HTML</button>
+                        <button class="tab-btn" data-file="css">CSS</button>
+                        <button class="tab-btn" data-file="js">JS</button>
+                    </div>
+                    <span class="text-[11px] font-medium opacity-50 uppercase tracking-widest shrink-0" id="current-file">index.html</span>
+                </div>
+                <div class="flex items-center space-x-2 self-end md:self-auto">
+                    <button onclick="copyCode()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5">Copy</button>
+                    <button onclick="clearCode()" class="text-[10px] text-red-400/50 hover:text-red-400 transition px-2 py-1 rounded-md hover:bg-white/5">Clear</button>
+                </div>
+            </div>
+            <div class="glass-panel flex-grow relative">
+                <div class="editor-wrapper">
+                    <textarea id="real-editor" spellcheck="false" placeholder="Start coding..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between mb-3 px-2">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500/50 animate-pulse"></span>
+                    <span class="text-[11px] font-medium opacity-50 uppercase tracking-widest">Live Output</span>
+                </div>
+                <button onclick="toggleFullscreen()" class="text-[10px] opacity-50 hover:opacity-100 transition">View Full</button>
+            </div>
+            <div class="glass-panel flex-grow bg-white min-h-[300px] md:min-h-0">
+                <iframe id="preview-frame" class="w-full h-full border-none" title="Live Preview"></iframe>
+            </div>
+        </div>
+    </main>
+
+    <div id="ai-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xl hidden z-[100] flex items-center justify-center p-4">
+        <div class="glass-panel max-w-sm w-full p-6 md:p-8 mx-4">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 class="text-lg md:text-xl font-bold">Neural Link</h3>
+                    <p class="text-xs opacity-50">Select your logic engine</p>
+                </div>
+                <button onclick="closeAiModal()" class="text-lg opacity-30 hover:opacity-100">×</button>
+            </div>
+            <div class="space-y-3">
+                <a href="https://chat.qwen.ai/" target="_blank" class="block p-4 rounded-xl border border-white/5 hover:bg-white/5 transition group">
+                    <div class="flex justify-between items-center text-sm">Qwen 2.5 <span class="group-hover:translate-x-1 transition">→</span></div>
+                </a>
+                <a href="https://www.deepseek.com/" target="_blank" class="block p-4 rounded-xl border border-white/5 hover:bg-white/5 transition group">
+                    <div class="flex justify-between items-center text-sm">DeepSeek Coder <span class="group-hover:translate-x-1 transition">→</span></div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const editor = document.getElementById('real-editor');
+        const iframe = document.getElementById('preview-frame');
+        const saveBtn = document.getElementById('manual-save-btn');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const currentFileSpan = document.getElementById('current-file');
+
+        let currentFile = 'html';
+        const files = {
+            html: `<h1>Hello Adele Labs!</h1>\n<p>Welcome to the simplified editor.</p>\n<button onclick="alert('Hello!')">Click me</button>`,
+            css: `body {\n  font-family: sans-serif;\n  padding: 20px;\n  background: #f0f0f0;\n}\n\nh1 {\n  color: #a78bfa;\n  margin-bottom: 20px;\n}\n\nbutton {\n  background: #a78bfa;\n  color: white;\n  border: none;\n  padding: 10px 20px;\n  border-radius: 8px;\n  cursor: pointer;\n}`,
+            js: `// JavaScript code here\nconsole.log('Editor loaded');\n\ndocument.addEventListener('click', function(e) {\n  if(e.target.tagName === 'BUTTON') {\n    console.log('Button clicked:', e.target.textContent);\n  }\n});`
+        };
+
+        // Fix for cursor issues
+        let isComposing = false;
+
+        function updatePreview() {
+            const doc = iframe.contentDocument;
+            if (!doc) return;
+            
+            doc.open();
+            
+            const htmlContent = files.html || '';
+            const cssContent = files.css || '';
+            const jsContent = files.js || '';
+            
+            // Создаем HTML структуру
+            let html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 20px; min-height: 100vh; }
+        ${cssContent}
+    </style>
+</head>
+<body>
+    ${htmlContent}`;
+            
+            // Добавляем JavaScript безопасным способом
+            if (jsContent.trim()) {
+                html += `
+    <script>
+        (function() {
+            try {
+                ${jsContent}
+            } catch(e) {
+                console.error('JavaScript Error:', e);
+            }
+        })();
+    <\/script>`;
+            }
+            
+            html += `
+</body>
+</html>`;
+            
+            doc.write(html);
+            doc.close();
+        }
+
+        function updateCode() {
+            if (isComposing) return;
+            
+            files[currentFile] = editor.value;
+            updatePreview();
+            saveToStorage();
+        }
+
+        function switchFile(fileType) {
+            currentFile = fileType;
+            
+            // Update active tab
+            tabButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.file === fileType);
+            });
+            
+            // Update file name display
+            const fileNames = {
+                html: 'index.html',
+                css: 'style.css',
+                js: 'script.js'
+            };
+            currentFileSpan.textContent = fileNames[fileType];
+            
+            // Load content
+            editor.value = files[fileType] || '';
+            
+            // Reset editor state to prevent cursor issues
+            setTimeout(() => {
+                editor.focus();
+                editor.setSelectionRange(0, 0);
+                editor.scrollTop = 0;
+                editor.scrollLeft = 0;
+            }, 10);
+        }
+
+        function manualSave() {
+            saveToStorage();
+            const originalContent = saveBtn.innerHTML;
+            saveBtn.innerHTML = `<span class="hidden md:inline">✓ Saved</span>`;
+            setTimeout(() => { 
+                saveBtn.innerHTML = `<svg class="w-3 h-3 md:w-4 md:h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg><span class="hidden md:inline">Save</span>`;
+            }, 2000);
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('studio_files', JSON.stringify(files));
+        }
+
+        function loadFromStorage() {
+            const saved = localStorage.getItem('studio_files');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(files, parsed);
+                } catch(e) {
+                    console.log('Using default files');
+                }
+            }
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('light-mode');
+            const isLight = document.documentElement.classList.contains('light-mode');
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (isLight) {
+                themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>`;
+            } else {
+                themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`;
+            }
+        }
+
+        function copyCode() {
+            navigator.clipboard.writeText(editor.value).then(() => {
+                alert("Code copied to clipboard!");
+            });
+        }
+
+        function clearCode() {
+            if(confirm("Clear current file?")) {
+                editor.value = "";
+                files[currentFile] = "";
+                updatePreview();
+                saveToStorage();
+            }
+        }
+
+        function openAiModal() { 
+            document.getElementById('ai-modal').classList.remove('hidden'); 
+        }
+        
+        function closeAiModal() { 
+            document.getElementById('ai-modal').classList.add('hidden'); 
+        }
+        
+        function toggleFullscreen() { 
+            if (!document.fullscreenElement) {
+                iframe.requestFullscreen?.() || 
+                iframe.webkitRequestFullscreen?.() || 
+                iframe.mozRequestFullScreen?.();
+            } else {
+                document.exitFullscreen?.() || 
+                document.webkitExitFullscreen?.() || 
+                document.mozCancelFullScreen?.();
+            }
+        }
+
+        // Event Listeners
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => switchFile(btn.dataset.file));
+        });
+
+        // Fix for cursor issues
+        editor.addEventListener('compositionstart', () => {
+            isComposing = true;
+        });
+
+        editor.addEventListener('compositionend', () => {
+            isComposing = false;
+            updateCode();
+        });
+
+        editor.addEventListener('input', updateCode);
+        
+        editor.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+                updateCode();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                manualSave();
+            }
+        });
+
+        // Handle mobile keyboard issues
+        editor.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (document.activeElement !== editor) {
+                    editor.scrollLeft = 0;
+                }
+            }, 100);
+        });
+
+        // Mobile orientation change fix
+        window.addEventListener('resize', () => {
+            if (editor) {
+                editor.style.height = 'auto';
+                setTimeout(() => {
+                    editor.style.height = '100%';
+                }, 50);
+            }
+        });
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            switchFile('html');
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
