@@ -13,7 +13,7 @@
         :root {
             --bg: #080808;
             --panel: #111111;
-            --accent: #a78bfa;
+            --accent: #29d140;
             --text: #f1f5f9;
             --border: rgba(255, 255, 255, 0.08);
         }
@@ -21,9 +21,9 @@
         .light-mode {
             --bg: #f1f5f9;
             --panel: #ffffff;
-            --accent: #6366f1;
+            --accent: #00f120;
             --text: #0f172a;
-            --border: rgba(0, 0, 0, 0.08);
+            --border: rgba(0, 0, 0, 0.267);
         }
 
         body {
@@ -443,7 +443,7 @@
 
         let currentFile = 'html';
         const files = {
-            html: `<h1>Hello Adele Labs!</h1>\n<p>Welcome to the enhanced editor.</p>\n<button onclick="alert('Hello!')">Click me</button>\n\n<!-- Try console.log() in JavaScript tab -->`,
+            html: `<h1>Hello Garage Labs!</h1>\n<p>Welcome to the enhanced editor.</p>\n<button onclick="alert('Hello!')">Click me</button>\n\n<!-- Try console.log() in JavaScript tab -->`,
             css: `body {\n  font-family: sans-serif;\n  padding: 20px;\n  background: #f0f0f0;\n}\n\nh1 {\n  color: #a78bfa;\n  margin-bottom: 20px;\n}\n\nbutton {\n  background: #a78bfa;\n  color: white;\n  border: none;\n  padding: 10px 20px;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: transform 0.2s;\n}\n\nbutton:hover {\n  transform: translateY(-2px);\n}`,
             js: `// JavaScript code here\nconsole.log('Editor loaded successfully!');\nconsole.info('Try the Force Update button!');\n\ndocument.addEventListener('click', function(e) {\n  if(e.target.tagName === 'BUTTON') {\n    console.log('Button clicked:', e.target.textContent);\n  }\n});`
         };
