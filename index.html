@@ -16,14 +16,16 @@
             --accent: #29d140;
             --text: #f1f5f9;
             --border: rgba(255, 255, 255, 0.08);
+            --logo-fill: #ffffff;
         }
 
         .light-mode {
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --panel: #ffffff;
-            --accent: #00f120;
-            --text: #0f172a;
-            --border: rgba(0, 0, 0, 0.267);
+            --accent: #00a510;
+            --text: #1e293b;
+            --border: rgba(0, 0, 0, 0.1);
+            --logo-fill: #0f172a;
         }
 
         body {
@@ -66,12 +68,12 @@
             overflow: hidden;
         }
 
-        /* --- EDITOR STYLES --- */
-        #editor-container {
+        /* EDITOR STYLES */
+        .editor-wrapper {
             position: relative;
-            font-family: 'JetBrains Mono', monospace;
-            width: 100%;
             height: 100%;
+            width: 100%;
+            overflow: hidden;
         }
 
         #real-editor {
@@ -80,7 +82,7 @@
             padding: 24px;
             font-size: 14px;
             line-height: 1.6;
-            font-family: 'JetBrains Mono', monospace !important;
+            font-family: 'JetBrains Mono', monospace;
             tab-size: 4;
             white-space: pre;
             background: transparent;
@@ -99,8 +101,12 @@
         }
 
         #real-editor::-webkit-scrollbar { width: 6px; }
-        #real-editor::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        #real-editor::-webkit-scrollbar-thumb { 
+            background: var(--border); 
+            border-radius: 10px; 
+        }
 
+        /* BUTTON STYLES */
         .ai-glow-btn {
             position: relative;
             overflow: hidden;
@@ -108,14 +114,27 @@
             background: rgba(167, 139, 250, 0.05);
             transition: all 0.3s ease;
         }
-        .ai-glow-btn:hover { background: rgba(167, 139, 250, 0.15); box-shadow: 0 0 20px rgba(167, 139, 250, 0.2); }
+        .ai-glow-btn:hover { 
+            background: rgba(167, 139, 250, 0.15); 
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.2); 
+        }
 
         .save-btn {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border);
             transition: all 0.2s;
         }
-        .save-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--accent); }
+        .save-btn:hover { 
+            background: rgba(0, 0, 0, 0.1); 
+            border-color: var(--accent); 
+        }
+
+        .light-mode .save-btn {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .light-mode .save-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
 
         .force-update-btn {
             background: rgba(34, 197, 94, 0.05);
@@ -126,6 +145,17 @@
             background: rgba(34, 197, 94, 0.15); 
             border-color: rgba(34, 197, 94, 0.5);
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+
+        .clear-all-btn {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            transition: all 0.2s;
+        }
+        .clear-all-btn:hover { 
+            background: rgba(239, 68, 68, 0.15); 
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
         }
 
         /* TAB STYLES */
@@ -151,7 +181,81 @@
 
         .tab-btn:hover:not(.active) {
             opacity: 0.8;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .light-mode .tab-btn:hover:not(.active) {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        /* STATS PANEL */
+        .stats-panel {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 11px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .light-mode .stats-panel {
+            background: rgba(255, 255, 255, 0.8);
+            color: #1e293b;
+        }
+
+        .stats-panel:hover { 
+            opacity: 1; 
+        }
+
+        /* CONSOLE PANEL */
+        .console-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 1px solid var(--border);
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            z-index: 20;
+            display: none;
+        }
+
+        .light-mode .console-panel {
+            background: rgba(255, 255, 255, 0.98);
+            color: #1e293b;
+        }
+
+        .console-item {
+            padding: 4px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .light-mode .console-item {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .console-log { color: #d4d4d4; }
+        .light-mode .console-log { color: #4b5563; }
+        .console-error { color: #f87171; }
+        .console-warn { color: #fbbf24; }
+        .console-info { color: #60a5fa; }
+
+        /* LOGO STYLES */
+        .logo-svg {
+            transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-circle {
+            fill: var(--logo-fill);
+            transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* MOBILE OPTIMIZATION */
@@ -171,12 +275,10 @@
                 gap: 8px;
             }
 
-            .ai-glow-btn {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
-            .save-btn {
+            .ai-glow-btn,
+            .save-btn,
+            .force-update-btn,
+            .clear-all-btn {
                 padding: 8px 12px;
                 font-size: 12px;
             }
@@ -230,21 +332,17 @@
                 display: none;
             }
 
-            .ai-glow-btn span:last-child {
+            .ai-glow-btn span:last-child,
+            .save-btn span:last-child,
+            .force-update-btn span:last-child,
+            .clear-all-btn span:last-child {
                 display: none;
             }
 
-            .ai-glow-btn {
-                padding: 8px;
-                min-width: 40px;
-                justify-content: center;
-            }
-
-            .save-btn span:last-child {
-                display: none;
-            }
-
-            .save-btn {
+            .ai-glow-btn,
+            .save-btn,
+            .force-update-btn,
+            .clear-all-btn {
                 padding: 8px;
                 min-width: 40px;
                 justify-content: center;
@@ -259,64 +357,6 @@
                 font-size: 12px;
             }
         }
-
-        /* FIX FOR CURSOR AND TEXT ISSUES */
-        .editor-wrapper {
-            position: relative;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        #real-editor:focus {
-            outline: none !important;
-            box-shadow: none !important;
-        }
-
-        /* Stats panel */
-        .stats-panel {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 11px;
-            opacity: 0.7;
-            transition: opacity 0.3s;
-            z-index: 10;
-        }
-
-        .stats-panel:hover {
-            opacity: 1;
-        }
-
-        /* Console panel */
-        .console-panel {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 1px solid var(--border);
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            z-index: 20;
-            display: none;
-        }
-
-        .console-item {
-            padding: 4px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .console-log { color: #d4d4d4; }
-        .console-error { color: #f87171; }
-        .console-warn { color: #fbbf24; }
-        .console-info { color: #60a5fa; }
     </style>
 </head>
 <body>
@@ -324,7 +364,26 @@
 
     <nav class="h-20 flex items-center justify-between px-4 md:px-8 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md z-50">
         <div class="flex items-center space-x-4 md:space-x-6">
-            <div class="w-8 h-8 md:w-10 md:h-10 bg- flex items-center justify-center font-bold text-sm md:text-base"><img src="assets/logo-white.svg" alt=""></div>
+            <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
+                <svg id="logo" class="logo-svg w-full h-full" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="logo-circle" cx="8.52841" cy="15" r="2.84286"/>
+                    <circle class="logo-circle" cx="2.84286" cy="15" r="2.84286"/>
+                    <circle class="logo-circle" cx="8.52841" cy="9.3143" r="2.84286"/>
+                    <circle class="logo-circle" cx="8.52841" cy="3.62857" r="2.84286"/>
+                    <circle class="logo-circle" cx="14.214" cy="3.62857" r="2.84286"/>
+                    <circle class="logo-circle" cx="8.52841" cy="20.6858" r="2.84286"/>
+                    <circle class="logo-circle" cx="8.52841" cy="26.3714" r="2.84286"/>
+                    <circle class="logo-circle" cx="14.214" cy="26.3714" r="2.84286"/>
+                    <circle class="logo-circle" cx="2.84286" cy="2.84286" r="2.84286" transform="matrix(-1 0 0 1 34.1152 12.1572)"/>
+                    <circle class="logo-circle" cx="2.84286" cy="2.84286" r="2.84286" transform="matrix(-1 0 0 1 39.8008 12.1572)"/>
+                    <circle class="logo-circle" cx="2.84286" cy="2.84286" r="2.84286" transform="matrix(-1 0 0 1 34.1152 6.47144)"/>
+                    <circle class="logo-circle" cx="2.84286" cy="2.84286" r="2.84286" transform="matrix(-1 0 0 1 34.1152 0.785706)"/>
+                    <circle class="logo-circle" cx="2.84286" cy="2.84286" r="2.84286" transform="matrix(-1 0 0 1 28.4297 0.785706)"/>
+                    <circle class="logo-circle" cx="2.84286" cy="2.84286" r="2.84286" transform="matrix(-1 0 0 1 34.1152 17.8428)"/>
+                    <circle class="logo-circle" cx="2.84286" cy="2.84286" r="2.84286" transform="matrix(-1 0 0 1 34.1152 23.5286)"/>
+                    <circle class="logo-circle" cx="2.84286" cy="2.84286" r="2.84286" transform="matrix(-1 0 0 1 28.4297 23.5286)"/>
+                </svg>
+            </div>
             <div class="hidden md:block">
                 <p class="text-sm font-semibold tracking-wide">Garage Code</p>
                 <p class="text-[10px] opacity-40 uppercase tracking-[0.2em]">Web Editor v2.1</p>
@@ -332,19 +391,23 @@
         </div>
 
         <div class="flex items-center space-x-2 md:space-x-3">
-            <button onclick="toggleTheme()" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/10">
-                <svg id="theme-icon" class="w-4 h-4 md:w-5 md:h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <button onclick="Studio.toggleTheme()" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/10">
+                <svg id="theme-icon" class="w-4 h-4 md:w-5 md:h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
             </button>
             
-            <button id="manual-save-btn" onclick="manualSave()" class="save-btn px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex items-center space-x-1 md:space-x-2">
+            <button onclick="Studio.manualSave()" class="save-btn px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex items-center space-x-1 md:space-x-2">
                 <svg class="w-3 h-3 md:w-4 md:h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
                 </svg>
                 <span class="hidden md:inline">Save</span>
             </button>
 
-            <button onclick="openAiModal()" class="ai-glow-btn px-3 py-2 md:px-5 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex items-center space-x-1 md:space-x-3">
-                <svg class="w-3 h-3 md:w-4 md:h-4 text-purple-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+            <button onclick="Studio.openAiModal()" class="ai-glow-btn px-3 py-2 md:px-5 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex items-center space-x-1 md:space-x-3">
+                <svg class="w-3 h-3 md:w-4 md:h-4 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+                </svg>
                 <span class="hidden md:inline">AI Assistant</span>
             </button>
         </div>
@@ -362,8 +425,14 @@
                     <span class="text-[11px] font-medium opacity-50 uppercase tracking-widest shrink-0" id="current-file">index.html</span>
                 </div>
                 <div class="flex items-center space-x-2 self-end md:self-auto">
-                    <button onclick="copyCode()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5">Copy</button>
-                    <button onclick="clearCode()" class="text-[10px] text-red-400/50 hover:text-red-400 transition px-2 py-1 rounded-md hover:bg-white/5">Clear</button>
+                    <button onclick="Studio.copyCode()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5">Copy</button>
+                    <button onclick="Studio.clearCurrentFile()" class="text-[10px] text-red-400/50 hover:text-red-400 transition px-2 py-1 rounded-md hover:bg-white/5">Clear</button>
+                    <button onclick="Studio.clearAllFiles()" class="clear-all-btn text-[10px] px-2 py-1 rounded-md flex items-center space-x-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span>Clear All</span>
+                    </button>
                 </div>
             </div>
             <div class="glass-panel flex-grow relative">
@@ -383,18 +452,18 @@
                     <span class="text-[11px] font-medium opacity-50 uppercase tracking-widest">Live Output</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="toggleConsole()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5" title="Toggle Console">
+                    <button onclick="Studio.toggleConsole()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5" title="Toggle Console">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </button>
-                    <button onclick="forceUpdate()" class="force-update-btn text-[10px] px-3 py-1.5 rounded-md flex items-center space-x-1">
+                    <button onclick="Studio.forceUpdate()" class="force-update-btn text-[10px] px-3 py-1.5 rounded-md flex items-center space-x-1">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
                         <span>Force Update</span>
                     </button>
-                    <button onclick="toggleFullscreen()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5">Full</button>
+                    <button onclick="Studio.toggleFullscreen()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5">Full</button>
                 </div>
             </div>
             <div class="glass-panel flex-grow bg-white min-h-[300px] md:min-h-0 relative">
@@ -402,7 +471,7 @@
                 <div id="console-panel" class="console-panel">
                     <div class="console-header flex justify-between items-center p-2 border-b border-[var(--border)]">
                         <span class="text-xs font-medium">Console</span>
-                        <button onclick="clearConsole()" class="text-[10px] opacity-50 hover:opacity-100">Clear</button>
+                        <button onclick="Studio.clearConsole()" class="text-[10px] opacity-50 hover:opacity-100">Clear</button>
                     </div>
                     <div id="console-content"></div>
                 </div>
@@ -417,7 +486,7 @@
                     <h3 class="text-lg md:text-xl font-bold">Neural Link</h3>
                     <p class="text-xs opacity-50">Select your logic engine</p>
                 </div>
-                <button onclick="closeAiModal()" class="text-lg opacity-30 hover:opacity-100">×</button>
+                <button onclick="Studio.closeAiModal()" class="text-lg opacity-30 hover:opacity-100">×</button>
             </div>
             <div class="space-y-3">
                 <a href="https://chat.qwen.ai/" target="_blank" class="block p-4 rounded-xl border border-white/5 hover:bg-white/5 transition group">
@@ -431,377 +500,450 @@
     </div>
 
     <script>
-        const editor = document.getElementById('real-editor');
-        const iframe = document.getElementById('preview-frame');
-        const saveBtn = document.getElementById('manual-save-btn');
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const currentFileSpan = document.getElementById('current-file');
-        const lineCountEl = document.getElementById('line-count');
-        const charCountEl = document.getElementById('char-count');
-        const consolePanel = document.getElementById('console-panel');
-        const consoleContent = document.getElementById('console-content');
-
-        let currentFile = 'html';
-        const files = {
-            html: `<h1>Hello Garage Labs!</h1>\n<p>Welcome to the enhanced editor.</p>\n<button onclick="alert('Hello!')">Click me</button>\n\n<!-- Try console.log() in JavaScript tab -->`,
-            css: `body {\n  font-family: sans-serif;\n  padding: 20px;\n  background: #f0f0f0;\n}\n\nh1 {\n  color: #a78bfa;\n  margin-bottom: 20px;\n}\n\nbutton {\n  background: #a78bfa;\n  color: white;\n  border: none;\n  padding: 10px 20px;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: transform 0.2s;\n}\n\nbutton:hover {\n  transform: translateY(-2px);\n}`,
-            js: `// JavaScript code here\nconsole.log('Editor loaded successfully!');\nconsole.info('Try the Force Update button!');\n\ndocument.addEventListener('click', function(e) {\n  if(e.target.tagName === 'BUTTON') {\n    console.log('Button clicked:', e.target.textContent);\n  }\n});`
-        };
-
-        // Console messages storage
-        let consoleMessages = [];
-
-        // Fix for cursor issues
-        let isComposing = false;
-
-        function updateStats() {
-            const text = editor.value;
-            const lines = text.split('\n').length;
-            const chars = text.length;
-            lineCountEl.textContent = `Ln ${lines}`;
-            charCountEl.textContent = `Ch ${chars}`;
-        }
-
-        function updatePreview() {
-            const doc = iframe.contentDocument;
-            if (!doc) return;
-            
-            // Clear previous console messages
-            consoleMessages = [];
-            updateConsoleDisplay();
-            
-            doc.open();
-            
-            const htmlContent = files.html || '';
-            const cssContent = files.css || '';
-            const jsContent = files.js || '';
-            
-            // Override console methods to capture output
-            const consoleOverride = `
-                const originalLog = console.log;
-                const originalError = console.error;
-                const originalWarn = console.warn;
-                const originalInfo = console.info;
-                
-                console.log = function(...args) {
-                    originalLog.apply(console, args);
-                    window.parent.postMessage({
-                        type: 'console',
-                        method: 'log',
-                        args: args.map(arg => 
-                            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-                        )
-                    }, '*');
-                };
-                
-                console.error = function(...args) {
-                    originalError.apply(console, args);
-                    window.parent.postMessage({
-                        type: 'console',
-                        method: 'error',
-                        args: args.map(arg => 
-                            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-                        )
-                    }, '*');
-                };
-                
-                console.warn = function(...args) {
-                    originalWarn.apply(console, args);
-                    window.parent.postMessage({
-                        type: 'console',
-                        method: 'warn',
-                        args: args.map(arg => 
-                            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-                        )
-                    }, '*');
-                };
-                
-                console.info = function(...args) {
-                    originalInfo.apply(console, args);
-                    window.parent.postMessage({
-                        type: 'console',
-                        method: 'info',
-                        args: args.map(arg => 
-                            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-                        )
-                    }, '*');
-                };
-            `;
-            
-            // Create HTML structure
-            let html = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; padding: 20px; min-height: 100vh; }
-        ${cssContent}
-    </style>
-</head>
-<body>
-    ${htmlContent}`;
-            
-            // Add JavaScript with console override
-            if (jsContent.trim()) {
-                html += `
-    <script>
-        ${consoleOverride}
-        
-        (function() {
-            try {
-                ${jsContent}
-            } catch(e) {
-                console.error('JavaScript Error:', e.message, 'at line', e.lineNumber);
-            }
-        })();
-    <\/script>`;
-            }
-            
-            html += `
-</body>
-</html>`;
-            
-            doc.write(html);
-            doc.close();
-            
-            // Update stats
-            updateStats();
-        }
-
-        function forceUpdate() {
-            consoleMessages = [];
-            updateConsoleDisplay();
-            
-            // Clear iframe cache by changing src
-            iframe.src = 'about:blank';
-            setTimeout(() => {
-                updatePreview();
-                
-                // Show notification
-                const btn = event?.target.closest('button') || document.querySelector('.force-update-btn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = `<span>✓ Updated</span>`;
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                }, 1000);
-            }, 50);
-        }
-
-        function updateCode() {
-            if (isComposing) return;
-            
-            files[currentFile] = editor.value;
-            updatePreview();
-            saveToStorage();
-            updateStats();
-        }
-
-        function switchFile(fileType) {
-            currentFile = fileType;
-            
-            // Update active tab
-            tabButtons.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.file === fileType);
-            });
-            
-            // Update file name display
-            const fileNames = {
-                html: 'index.html',
-                css: 'style.css',
-                js: 'script.js'
+        // Studio Editor - Main Application Object
+        const Studio = (() => {
+            // DOM Elements
+            const elements = {
+                editor: document.getElementById('real-editor'),
+                iframe: document.getElementById('preview-frame'),
+                saveBtn: document.getElementById('manual-save-btn'),
+                tabButtons: document.querySelectorAll('.tab-btn'),
+                currentFileSpan: document.getElementById('current-file'),
+                lineCountEl: document.getElementById('line-count'),
+                charCountEl: document.getElementById('char-count'),
+                consolePanel: document.getElementById('console-panel'),
+                consoleContent: document.getElementById('console-content'),
+                aiModal: document.getElementById('ai-modal'),
+                themeIcon: document.getElementById('theme-icon'),
+                logo: document.getElementById('logo')
             };
-            currentFileSpan.textContent = fileNames[fileType];
-            
-            // Load content
-            editor.value = files[fileType] || '';
-            
-            // Reset editor state to prevent cursor issues
-            setTimeout(() => {
-                editor.focus();
-                editor.setSelectionRange(0, 0);
-                editor.scrollTop = 0;
-                editor.scrollLeft = 0;
-                updateStats();
-            }, 10);
-        }
 
-        function manualSave() {
-            saveToStorage();
-            const originalContent = saveBtn.innerHTML;
-            saveBtn.innerHTML = `<span class="hidden md:inline">✓ Saved</span>`;
-            setTimeout(() => { 
-                saveBtn.innerHTML = `<svg class="w-3 h-3 md:w-4 md:h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg><span class="hidden md:inline">Save</span>`;
-            }, 2000);
-        }
-
-        function saveToStorage() {
-            localStorage.setItem('studio_files', JSON.stringify(files));
-        }
-
-        function loadFromStorage() {
-            const saved = localStorage.getItem('studio_files');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    Object.assign(files, parsed);
-                } catch(e) {
-                    console.log('Using default files');
+            // Application State
+            const state = {
+                currentFile: 'html',
+                isComposing: false,
+                consoleMessages: [],
+                files: {
+                    html: `<h1>Hello Garage Labs!</h1>\n<p>Welcome to the enhanced editor.</p>\n<button onclick="alert('Hello!')">Click me</button>\n\n<!-- Try console.log() in JavaScript tab -->`,
+                    css: `body {\n  font-family: sans-serif;\n  padding: 20px;\n  background: #f0f0f0;\n}\n\nh1 {\n  color: #a78bfa;\n  margin-bottom: 20px;\n}\n\nbutton {\n  background: #a78bfa;\n  color: white;\n  border: none;\n  padding: 10px 20px;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: transform 0.2s;\n}\n\nbutton:hover {\n  transform: translateY(-2px);\n}`,
+                    js: `// JavaScript code here\nconsole.log('Editor loaded successfully!');\nconsole.info('Try the Force Update button!');\n\ndocument.addEventListener('click', function(e) {\n  if(e.target.tagName === 'BUTTON') {\n    console.log('Button clicked:', e.target.textContent);\n  }\n});`
+                },
+                fileNames: {
+                    html: 'index.html',
+                    css: 'style.css',
+                    js: 'script.js'
                 }
-            }
-        }
+            };
 
-        function toggleTheme() {
-            document.documentElement.classList.toggle('light-mode');
-            const isLight = document.documentElement.classList.contains('light-mode');
-            const themeIcon = document.getElementById('theme-icon');
-            
-            if (isLight) {
-                themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>`;
-            } else {
-                themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`;
-            }
-        }
+            // Utility Functions
+            const utils = {
+                debounce(func, wait) {
+                    let timeout;
+                    return function executedFunction(...args) {
+                        const later = () => {
+                            clearTimeout(timeout);
+                            func(...args);
+                        };
+                        clearTimeout(timeout);
+                        timeout = setTimeout(later, wait);
+                    };
+                },
 
-        function copyCode() {
-            navigator.clipboard.writeText(editor.value).then(() => {
-                alert("Code copied to clipboard!");
-            });
-        }
+                showNotification(element, text, duration = 2000) {
+                    const originalContent = element.innerHTML;
+                    element.innerHTML = text;
+                    setTimeout(() => {
+                        element.innerHTML = originalContent;
+                    }, duration);
+                },
 
-        function clearCode() {
-            if(confirm("Clear current file?")) {
-                editor.value = "";
-                files[currentFile] = "";
-                updatePreview();
-                saveToStorage();
-                updateStats();
-            }
-        }
-
-        function openAiModal() { 
-            document.getElementById('ai-modal').classList.remove('hidden'); 
-        }
-        
-        function closeAiModal() { 
-            document.getElementById('ai-modal').classList.add('hidden'); 
-        }
-        
-        function toggleFullscreen() { 
-            if (!document.fullscreenElement) {
-                iframe.requestFullscreen?.() || 
-                iframe.webkitRequestFullscreen?.() || 
-                iframe.mozRequestFullScreen?.();
-            } else {
-                document.exitFullscreen?.() || 
-                document.webkitExitFullscreen?.() || 
-                document.mozCancelFullScreen?.();
-            }
-        }
-
-        // Console functions
-        function toggleConsole() {
-            consolePanel.style.display = consolePanel.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function clearConsole() {
-            consoleMessages = [];
-            updateConsoleDisplay();
-        }
-
-        function updateConsoleDisplay() {
-            consoleContent.innerHTML = '';
-            consoleMessages.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = `console-item console-${msg.method}`;
-                div.textContent = `> ${msg.args.join(' ')}`;
-                consoleContent.appendChild(div);
-            });
-            
-            // Auto-scroll to bottom
-            consoleContent.scrollTop = consoleContent.scrollHeight;
-        }
-
-        // Listen for console messages from iframe
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'console') {
-                consoleMessages.push({
-                    method: event.data.method,
-                    args: event.data.args,
-                    timestamp: new Date()
-                });
-                
-                // Keep only last 50 messages
-                if (consoleMessages.length > 50) {
-                    consoleMessages.shift();
+                escapeHtml(unsafe) {
+                    return unsafe
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
                 }
-                
-                updateConsoleDisplay();
-            }
-        });
+            };
 
-        // Event Listeners
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => switchFile(btn.dataset.file));
-        });
+            // File Management
+            const fileManager = {
+                saveCurrentFile() {
+                    state.files[state.currentFile] = elements.editor.value;
+                    this.saveToStorage();
+                },
 
-        // Fix for cursor issues
-        editor.addEventListener('compositionstart', () => {
-            isComposing = true;
-        });
+                saveToStorage() {
+                    try {
+                        localStorage.setItem('studio_files', JSON.stringify(state.files));
+                    } catch (e) {
+                        console.error('Failed to save to localStorage:', e);
+                    }
+                },
 
-        editor.addEventListener('compositionend', () => {
-            isComposing = false;
-            updateCode();
-        });
+                loadFromStorage() {
+                    try {
+                        const saved = localStorage.getItem('studio_files');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            Object.assign(state.files, parsed);
+                        }
+                    } catch (e) {
+                        console.log('Using default files');
+                    }
+                },
 
-        editor.addEventListener('input', function() {
-            updateCode();
-            updateStats();
-        });
-        
-        editor.addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
-                this.selectionStart = this.selectionEnd = start + 4;
-                updateCode();
-                updateStats();
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                manualSave();
-            }
-        });
+                clearCurrentFile() {
+                    if (confirm("Clear current file?")) {
+                        elements.editor.value = "";
+                        state.files[state.currentFile] = "";
+                        previewManager.updatePreview();
+                        this.saveToStorage();
+                        statsManager.updateStats();
+                    }
+                },
 
-        // Handle mobile keyboard issues
-        editor.addEventListener('blur', () => {
-            setTimeout(() => {
-                if (document.activeElement !== editor) {
-                    editor.scrollLeft = 0;
+                clearAllFiles() {
+                    if (confirm("Clear ALL files? This cannot be undone.")) {
+                        for (const file in state.files) {
+                            state.files[file] = "";
+                        }
+                        
+                        if (state.currentFile in state.files) {
+                            elements.editor.value = "";
+                        }
+                        
+                        previewManager.updatePreview();
+                        this.saveToStorage();
+                        statsManager.updateStats();
+                        
+                        // Show notification
+                        utils.showNotification(
+                            document.querySelector('.clear-all-btn'),
+                            `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>Cleared</span>`
+                        );
+                    }
+                },
+
+                switchFile(fileType) {
+                    if (!state.files.hasOwnProperty(fileType)) return;
+                    
+                    state.currentFile = fileType;
+                    
+                    // Update UI
+                    elements.tabButtons.forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.file === fileType);
+                    });
+                    
+                    elements.currentFileSpan.textContent = state.fileNames[fileType];
+                    elements.editor.value = state.files[fileType] || '';
+                    
+                    // Reset editor state
+                    setTimeout(() => {
+                        elements.editor.focus();
+                        elements.editor.setSelectionRange(0, 0);
+                        statsManager.updateStats();
+                    }, 10);
+                },
+
+                copyCode() {
+                    navigator.clipboard.writeText(elements.editor.value)
+                        .then(() => {
+                            alert("Code copied to clipboard!");
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy:', err);
+                        });
                 }
-            }, 100);
-        });
+            };
 
-        // Mobile orientation change fix
-        window.addEventListener('resize', () => {
-            if (editor) {
-                editor.style.height = 'auto';
-                setTimeout(() => {
-                    editor.style.height = '100%';
-                }, 50);
-            }
-        });
+            // Preview Management
+            const previewManager = {
+                updatePreview: utils.debounce(function() {
+                    if (state.isComposing) return;
+                    
+                    fileManager.saveCurrentFile();
+                    
+                    const doc = elements.iframe.contentDocument;
+                    if (!doc) return;
+                    
+                    // Clear console
+                    state.consoleMessages = [];
+                    consoleManager.updateConsoleDisplay();
+                    
+                    doc.open();
+                    
+                    const html = `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <style>${state.files.css || ''}</style>
+                        </head>
+                        <body>
+                            ${state.files.html || ''}
+                            ${state.files.js ? this.generateScriptTag() : ''}
+                        </body>
+                        </html>
+                    `;
+                    
+                    doc.write(html);
+                    doc.close();
+                    
+                    statsManager.updateStats();
+                }, 300),
 
-        // Initialize
-        window.addEventListener('DOMContentLoaded', () => {
-            loadFromStorage();
-            switchFile('html');
-            updatePreview();
-            updateStats();
+                generateScriptTag() {
+                    const consoleOverride = `
+                        const original = {};
+                        ['log', 'error', 'warn', 'info'].forEach(method => {
+                            original[method] = console[method];
+                            console[method] = function(...args) {
+                                original[method].apply(console, args);
+                                window.parent.postMessage({
+                                    type: 'console',
+                                    method: '${method}',
+                                    args: args.map(arg => 
+                                        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+                                    )
+                                }, '*');
+                            };
+                        });
+                        
+                        try {
+                            ${state.files.js}
+                        } catch(e) {
+                            console.error('JavaScript Error:', e.message);
+                        }
+                    `;
+                    
+                    return `<script>${consoleOverride}<\\/script>`;
+                },
+
+                forceUpdate() {
+                    state.consoleMessages = [];
+                    consoleManager.updateConsoleDisplay();
+                    
+                    // Force iframe reload
+                    elements.iframe.src = 'about:blank';
+                    setTimeout(() => {
+                        this.updatePreview();
+                        utils.showNotification(
+                            document.querySelector('.force-update-btn'),
+                            `<span>✓ Updated</span>`
+                        );
+                    }, 50);
+                }
+            };
+
+            // Console Management
+            const consoleManager = {
+                toggleConsole() {
+                    elements.consolePanel.style.display = 
+                        elements.consolePanel.style.display === 'block' ? 'none' : 'block';
+                },
+
+                clearConsole() {
+                    state.consoleMessages = [];
+                    this.updateConsoleDisplay();
+                },
+
+                updateConsoleDisplay() {
+                    elements.consoleContent.innerHTML = state.consoleMessages
+                        .map(msg => `<div class="console-item console-${msg.method}">> ${msg.args.join(' ')}</div>`)
+                        .join('');
+                    
+                    elements.consoleContent.scrollTop = elements.consoleContent.scrollHeight;
+                },
+
+                handleConsoleMessage(data) {
+                    state.consoleMessages.push({
+                        method: data.method,
+                        args: data.args,
+                        timestamp: new Date()
+                    });
+                    
+                    if (state.consoleMessages.length > 50) {
+                        state.consoleMessages.shift();
+                    }
+                    
+                    this.updateConsoleDisplay();
+                }
+            };
+
+            // Stats Management
+            const statsManager = {
+                updateStats() {
+                    const text = elements.editor.value;
+                    const lines = text.split('\n').length;
+                    const chars = text.length;
+                    
+                    elements.lineCountEl.textContent = `Ln ${lines}`;
+                    elements.charCountEl.textContent = `Ch ${chars}`;
+                }
+            };
+
+            // UI Management
+            const uiManager = {
+                toggleTheme() {
+                    document.documentElement.classList.toggle('light-mode');
+                    const isLight = document.documentElement.classList.contains('light-mode');
+                    
+                    // Update theme icon
+                    elements.themeIcon.innerHTML = isLight ? 
+                        `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>` :
+                        `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`;
+                    
+                    // Update logo color through CSS variable
+                    // The color is already handled by CSS variable --logo-fill
+                    // All circles have class .logo-circle that inherits from --logo-fill
+                },
+
+                openAiModal() {
+                    elements.aiModal.classList.remove('hidden');
+                },
+
+                closeAiModal() {
+                    elements.aiModal.classList.add('hidden');
+                },
+
+                toggleFullscreen() {
+                    if (!document.fullscreenElement) {
+                        elements.iframe.requestFullscreen?.() || 
+                        elements.iframe.webkitRequestFullscreen?.() || 
+                        elements.iframe.mozRequestFullScreen?.();
+                    } else {
+                        document.exitFullscreen?.() || 
+                        document.webkitExitFullscreen?.() || 
+                        document.mozCancelFullScreen?.();
+                    }
+                },
+
+                manualSave() {
+                    fileManager.saveToStorage();
+                    utils.showNotification(
+                        elements.saveBtn,
+                        `<svg class="w-3 h-3 md:w-4 md:h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="hidden md:inline">Saved</span>`
+                    );
+                }
+            };
+
+            // Event Handlers
+            const eventHandlers = {
+                setupEditorEvents() {
+                    // Composition events for IME support
+                    elements.editor.addEventListener('compositionstart', () => {
+                        state.isComposing = true;
+                    });
+
+                    elements.editor.addEventListener('compositionend', () => {
+                        state.isComposing = false;
+                        previewManager.updatePreview();
+                    });
+
+                    // Input handling with debouncing
+                    elements.editor.addEventListener('input', () => {
+                        previewManager.updatePreview();
+                        statsManager.updateStats();
+                    });
+
+                    // Tab key handling
+                    elements.editor.addEventListener('keydown', (e) => {
+                        if (e.key === 'Tab') {
+                            e.preventDefault();
+                            this.handleTabKey();
+                        }
+                        
+                        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                            e.preventDefault();
+                            uiManager.manualSave();
+                        }
+                    });
+
+                    // Mobile fixes
+                    elements.editor.addEventListener('blur', () => {
+                        setTimeout(() => {
+                            if (document.activeElement !== elements.editor) {
+                                elements.editor.scrollLeft = 0;
+                            }
+                        }, 100);
+                    });
+                },
+
+                handleTabKey() {
+                    const start = elements.editor.selectionStart;
+                    const end = elements.editor.selectionEnd;
+                    
+                    elements.editor.value = elements.editor.value.substring(0, start) + 
+                                           "    " + 
+                                           elements.editor.value.substring(end);
+                    
+                    elements.editor.selectionStart = elements.editor.selectionEnd = start + 4;
+                    previewManager.updatePreview();
+                    statsManager.updateStats();
+                },
+
+                setupTabEvents() {
+                    elements.tabButtons.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            fileManager.switchFile(btn.dataset.file);
+                        });
+                    });
+                },
+
+                setupWindowEvents() {
+                    // Console message listener
+                    window.addEventListener('message', (event) => {
+                        if (event.data.type === 'console') {
+                            consoleManager.handleConsoleMessage(event.data);
+                        }
+                    });
+
+                    // Window resize handler
+                    window.addEventListener('resize', () => {
+                        if (elements.editor) {
+                            elements.editor.style.height = 'auto';
+                            setTimeout(() => {
+                                elements.editor.style.height = '100%';
+                            }, 50);
+                        }
+                    });
+                }
+            };
+
+            // Public API
+            return {
+                init() {
+                    fileManager.loadFromStorage();
+                    fileManager.switchFile('html');
+                    previewManager.updatePreview();
+                    statsManager.updateStats();
+                    
+                    eventHandlers.setupEditorEvents();
+                    eventHandlers.setupTabEvents();
+                    eventHandlers.setupWindowEvents();
+                },
+
+                // Expose public methods
+                toggleTheme: uiManager.toggleTheme,
+                openAiModal: uiManager.openAiModal,
+                closeAiModal: uiManager.closeAiModal,
+                toggleFullscreen: uiManager.toggleFullscreen,
+                manualSave: uiManager.manualSave,
+                forceUpdate: previewManager.forceUpdate,
+                copyCode: fileManager.copyCode,
+                clearCurrentFile: fileManager.clearCurrentFile,
+                clearAllFiles: fileManager.clearAllFiles,
+                toggleConsole: consoleManager.toggleConsole,
+                clearConsole: consoleManager.clearConsole
+            };
+        })();
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            Studio.init();
         });
     </script>
 </body>
