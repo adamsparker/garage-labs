@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adele Labs | Studio Editor</title>
+    <title>Adele Labs | Studio Editor v2.3</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
             --bg: #080808;
             --panel: #111111;
             --accent: #29d140;
+            --secondary: #a78bfa;
             --text: #f1f5f9;
+            --text-secondary: #94a3b8;
             --border: rgba(255, 255, 255, 0.08);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
             --logo-fill: #ffffff;
         }
 
@@ -23,9 +29,18 @@
             --bg: #f8fafc;
             --panel: #ffffff;
             --accent: #00a510;
+            --secondary: #8b5cf6;
             --text: #1e293b;
+            --text-secondary: #64748b;
             --border: rgba(0, 0, 0, 0.1);
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
             --logo-fill: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -35,6 +50,7 @@
             transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             margin: 0;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .bokeh-container {
@@ -43,7 +59,9 @@
             z-index: -1;
             filter: blur(80px);
             opacity: 0.4;
+            pointer-events: none;
         }
+        
         .bokeh-ball {
             position: absolute;
             width: 30vw;
@@ -52,12 +70,29 @@
             background: var(--accent);
             top: -10%;
             left: -10%;
-            animation: float 15s infinite alternate;
+            animation: float 15s infinite alternate ease-in-out;
+        }
+
+        .bokeh-ball-secondary {
+            position: absolute;
+            width: 20vw;
+            height: 20vw;
+            border-radius: 50%;
+            background: var(--secondary);
+            bottom: -10%;
+            right: -10%;
+            animation: float-secondary 20s infinite alternate-reverse ease-in-out;
+            opacity: 0.3;
         }
 
         @keyframes float {
-            from { transform: translate(0, 0); }
-            to { transform: translate(20%, 20%); }
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20%, 20%) scale(1.1); }
+        }
+
+        @keyframes float-secondary {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-15%, -15%) scale(1.05); }
         }
 
         .glass-panel {
@@ -66,6 +101,11 @@
             border-radius: 16px;
             box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            box-shadow: 0 15px 40px -15px rgba(0,0,0,0.6);
         }
 
         /* EDITOR STYLES */
@@ -81,8 +121,9 @@
             height: 100%;
             padding: 24px;
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.7;
             font-family: 'JetBrains Mono', monospace;
+            font-weight: 400;
             tab-size: 4;
             white-space: pre;
             background: transparent;
@@ -98,118 +139,219 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
+            letter-spacing: 0.02em;
         }
 
-        #real-editor::-webkit-scrollbar { width: 6px; }
+        #real-editor::selection {
+            background: rgba(41, 209, 64, 0.3);
+        }
+
+        .light-mode #real-editor::selection {
+            background: rgba(0, 165, 16, 0.3);
+        }
+
+        #real-editor::-webkit-scrollbar { 
+            width: 8px; 
+            height: 8px;
+        }
+        
+        #real-editor::-webkit-scrollbar-track { 
+            background: transparent; 
+        }
+        
         #real-editor::-webkit-scrollbar-thumb { 
             background: var(--border); 
             border-radius: 10px; 
         }
+        
+        #real-editor::-webkit-scrollbar-thumb:hover { 
+            background: rgba(255, 255, 255, 0.15); 
+        }
+
+        .light-mode #real-editor::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
 
         /* BUTTON STYLES */
-        .ai-glow-btn {
+        .btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid transparent;
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(167, 139, 250, 0.3);
-            background: rgba(167, 139, 250, 0.05);
-            transition: all 0.3s ease;
         }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-xs {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .ai-glow-btn {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(167, 139, 250, 0.05));
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            color: var(--secondary);
+        }
+        
         .ai-glow-btn:hover { 
-            background: rgba(167, 139, 250, 0.15); 
-            box-shadow: 0 0 20px rgba(167, 139, 250, 0.2); 
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.1)); 
+            box-shadow: 0 0 25px rgba(167, 139, 250, 0.3); 
+            border-color: rgba(167, 139, 250, 0.5);
         }
 
         .save-btn {
-            background: rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.08);
             border: 1px solid var(--border);
-            transition: all 0.2s;
+            color: var(--text);
         }
+        
         .save-btn:hover { 
-            background: rgba(0, 0, 0, 0.1); 
+            background: rgba(0, 0, 0, 0.15); 
             border-color: var(--accent); 
         }
 
         .light-mode .save-btn {
             background: rgba(255, 255, 255, 0.05);
         }
+        
         .light-mode .save-btn:hover {
             background: rgba(255, 255, 255, 0.1);
         }
 
         .force-update-btn {
-            background: rgba(34, 197, 94, 0.05);
+            background: rgba(34, 197, 94, 0.08);
             border: 1px solid rgba(34, 197, 94, 0.3);
-            transition: all 0.2s;
+            color: var(--success);
         }
+        
         .force-update-btn:hover { 
             background: rgba(34, 197, 94, 0.15); 
             border-color: rgba(34, 197, 94, 0.5);
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
         }
 
         .clear-all-btn {
-            background: rgba(239, 68, 68, 0.05);
+            background: rgba(239, 68, 68, 0.08);
             border: 1px solid rgba(239, 68, 68, 0.3);
-            transition: all 0.2s;
+            color: var(--error);
         }
+        
         .clear-all-btn:hover { 
             background: rgba(239, 68, 68, 0.15); 
             border-color: rgba(239, 68, 68, 0.5);
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+        }
+
+        .export-btn {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+        }
+        
+        .export-btn:hover { 
+            background: rgba(59, 130, 246, 0.15); 
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
         }
 
         /* TAB STYLES */
         .tab-btn {
-            padding: 8px 12px;
-            font-size: 12px;
+            padding: 10px 16px;
+            font-size: 13px;
             font-weight: 500;
-            border-radius: 8px;
+            border-radius: 10px;
             background: transparent;
             border: 1px solid transparent;
             color: var(--text);
-            opacity: 0.6;
+            opacity: 0.7;
             transition: all 0.2s;
             cursor: pointer;
             white-space: nowrap;
+            position: relative;
         }
 
         .tab-btn.active {
             opacity: 1;
-            background: rgba(167, 139, 250, 0.1);
+            background: rgba(167, 139, 250, 0.12);
             border-color: rgba(167, 139, 250, 0.3);
+            color: var(--secondary);
         }
 
         .tab-btn:hover:not(.active) {
-            opacity: 0.8;
-            background: rgba(0, 0, 0, 0.05);
+            opacity: 0.9;
+            background: rgba(0, 0, 0, 0.08);
         }
 
         .light-mode .tab-btn:hover:not(.active) {
-            background: rgba(0, 0, 0, 0.03);
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tab-btn.active .tab-indicator {
+            opacity: 1;
         }
 
         /* STATS PANEL */
         .stats-panel {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 11px;
-            opacity: 0.7;
-            transition: opacity 0.3s;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 12px;
+            opacity: 0.8;
+            transition: all 0.3s;
             z-index: 10;
+            display: flex;
+            gap: 12px;
+            border: 1px solid var(--border);
         }
 
         .light-mode .stats-panel {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             color: #1e293b;
         }
 
         .stats-panel:hover { 
             opacity: 1; 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         /* CONSOLE PANEL */
@@ -218,14 +360,15 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.97);
             border-top: 1px solid var(--border);
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
+            font-size: 12px;
             z-index: 20;
             display: none;
+            backdrop-filter: blur(10px);
         }
 
         .light-mode .console-panel {
@@ -234,28 +377,247 @@
         }
 
         .console-item {
-            padding: 4px 12px;
+            padding: 8px 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
         }
 
         .light-mode .console-item {
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
+        .console-icon {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .console-content {
+            flex-grow: 1;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
         .console-log { color: #d4d4d4; }
         .light-mode .console-log { color: #4b5563; }
+        
         .console-error { color: #f87171; }
         .console-warn { color: #fbbf24; }
         .console-info { color: #60a5fa; }
+        
+        .console-time {
+            font-size: 10px;
+            opacity: 0.5;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
 
         /* LOGO STYLES */
         .logo-svg {
-            transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .logo-circle {
             fill: var(--logo-fill);
             transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: 12px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 350px;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .toast-success .toast-icon { color: var(--success); }
+        .toast-error .toast-icon { color: var(--error); }
+        .toast-warning .toast-icon { color: var(--warning); }
+        .toast-info .toast-icon { color: var(--secondary); }
+
+        .toast-content {
+            flex-grow: 1;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .toast-close:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--text);
+        }
+
+        .light-mode .toast-close:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* LOADING INDICATOR */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid transparent;
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* SHORTCUT HINTS */
+        .shortcut-hint {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 11px;
+            opacity: 0.7;
+            transition: all 0.3s;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .light-mode .shortcut-hint {
+            background: rgba(255, 255, 255, 0.85);
+            color: #1e293b;
+        }
+
+        .shortcut-hint:hover {
+            opacity: 1;
+        }
+
+        .shortcut-key {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .light-mode .shortcut-key {
+            background: rgba(0,0,0,0.1);
+        }
+
+        /* CODE SNIPPETS PANEL */
+        .snippets-panel {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            width: 300px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            z-index: 100;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .snippets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .snippets-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .snippet-item {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .light-mode .snippet-item {
+            background: rgba(0,0,0,0.02);
+        }
+
+        .snippet-item:hover {
+            background: rgba(167, 139, 250, 0.1);
+            border-color: rgba(167, 139, 250, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .snippet-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: var(--secondary);
+        }
+
+        .snippet-desc {
+            font-size: 11px;
+            opacity: 0.7;
         }
 
         /* MOBILE OPTIMIZATION */
@@ -275,10 +637,7 @@
                 gap: 8px;
             }
 
-            .ai-glow-btn,
-            .save-btn,
-            .force-update-btn,
-            .clear-all-btn {
+            .btn, .ai-glow-btn, .save-btn, .force-update-btn, .clear-all-btn, .export-btn {
                 padding: 8px 12px;
                 font-size: 12px;
             }
@@ -299,12 +658,12 @@
             #real-editor {
                 padding: 16px;
                 font-size: 13px;
-                line-height: 1.5;
+                line-height: 1.6;
             }
 
             .tab-btn {
-                padding: 6px 10px;
-                font-size: 11px;
+                padding: 8px 12px;
+                font-size: 12px;
             }
 
             #current-file {
@@ -319,6 +678,22 @@
 
             .mobile-stack .flex.space-x-2 {
                 align-self: flex-end;
+            }
+
+            .snippets-panel {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+
+            .toast-container {
+                top: 70px;
+                right: 10px;
+                left: 10px;
+            }
+
+            .toast {
+                max-width: 100%;
             }
         }
 
@@ -335,36 +710,108 @@
             .ai-glow-btn span:last-child,
             .save-btn span:last-child,
             .force-update-btn span:last-child,
-            .clear-all-btn span:last-child {
+            .clear-all-btn span:last-child,
+            .export-btn span:last-child {
                 display: none;
             }
 
             .ai-glow-btn,
             .save-btn,
             .force-update-btn,
-            .clear-all-btn {
+            .clear-all-btn,
+            .export-btn {
                 padding: 8px;
                 min-width: 40px;
                 justify-content: center;
             }
 
             .tab-btn {
-                padding: 5px 8px;
-                font-size: 10px;
+                padding: 6px 10px;
+                font-size: 11px;
             }
 
             #real-editor {
                 font-size: 12px;
+                line-height: 1.5;
             }
+
+            .stats-panel {
+                flex-direction: column;
+                gap: 4px;
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            .shortcut-hint {
+                display: none;
+            }
+        }
+
+        /* ANIMATIONS */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* CUSTOM SCROLLBAR FOR ALL */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+        .light-mode ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
+
+        /* FOCUS STATES */
+        *:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        *:focus:not(:focus-visible) {
+            outline: none;
         }
     </style>
 </head>
 <body>
-    <div class="bokeh-container"><div class="bokeh-ball"></div></div>
+    <div class="bokeh-container">
+        <div class="bokeh-ball"></div>
+        <div class="bokeh-ball-secondary"></div>
+    </div>
 
-    <nav class="h-20 flex items-center justify-between px-4 md:px-8 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md z-50">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Code Snippets Panel -->
+    <div id="snippets-panel" class="snippets-panel glass-panel">
+        <div class="snippets-header">
+            <h3 class="text-lg font-semibold">Code Snippets</h3>
+            <button onclick="Studio.closeSnippets()" class="text-lg opacity-30 hover:opacity-100 transition">&times;</button>
+        </div>
+        <div class="snippets-grid" id="snippets-grid">
+            <!-- Snippets will be loaded here -->
+        </div>
+    </div>
+
+    <nav class="h-20 flex items-center justify-between px-4 md:px-8 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md z-50 sticky top-0">
         <div class="flex items-center space-x-4 md:space-x-6">
-            <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
+            <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity" onclick="Studio.showToast('Welcome to Garage Code Editor!', 'info')">
                 <svg id="logo" class="logo-svg w-full h-full" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle class="logo-circle" cx="8.52841" cy="15" r="2.84286"/>
                     <circle class="logo-circle" cx="2.84286" cy="15" r="2.84286"/>
@@ -386,28 +833,34 @@
             </div>
             <div class="hidden md:block">
                 <p class="text-sm font-semibold tracking-wide">Garage Code</p>
-                <p class="text-[10px] opacity-40 uppercase tracking-[0.2em]">Web Editor v2.1</p>
+                <p class="text-[10px] opacity-40 uppercase tracking-[0.2em]">Web Editor v2.3</p>
             </div>
         </div>
 
         <div class="flex items-center space-x-2 md:space-x-3">
-            <button onclick="Studio.toggleTheme()" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/10">
+            <button onclick="Studio.showSnippets()" class="btn btn-sm export-btn" title="Code Snippets">
+                <i class="fas fa-code"></i>
+                <span class="hidden md:inline">Snippets</span>
+            </button>
+            
+            <button onclick="Studio.exportProject()" class="btn btn-sm export-btn" title="Export Project">
+                <i class="fas fa-download"></i>
+                <span class="hidden md:inline">Export</span>
+            </button>
+            
+            <button onclick="Studio.toggleTheme()" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/10" title="Toggle Theme">
                 <svg id="theme-icon" class="w-4 h-4 md:w-5 md:h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                 </svg>
             </button>
             
-            <button onclick="Studio.manualSave()" class="save-btn px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex items-center space-x-1 md:space-x-2">
-                <svg class="w-3 h-3 md:w-4 md:h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-                </svg>
+            <button onclick="Studio.manualSave()" class="btn btn-sm save-btn" title="Save (Ctrl+S)">
+                <i class="fas fa-save"></i>
                 <span class="hidden md:inline">Save</span>
             </button>
 
-            <button onclick="Studio.openAiModal()" class="ai-glow-btn px-3 py-2 md:px-5 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex items-center space-x-1 md:space-x-3">
-                <svg class="w-3 h-3 md:w-4 md:h-4 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
-                </svg>
+            <button onclick="Studio.openAiModal()" class="btn btn-sm ai-glow-btn" title="AI Assistant">
+                <i class="fas fa-robot"></i>
                 <span class="hidden md:inline">AI Assistant</span>
             </button>
         </div>
@@ -418,29 +871,63 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-3 px-2 gap-2">
                 <div class="flex items-center space-x-2 md:space-x-4 w-full md:w-auto">
                     <div class="flex space-x-1 overflow-x-auto">
-                        <button class="tab-btn active" data-file="html">HTML</button>
-                        <button class="tab-btn" data-file="css">CSS</button>
-                        <button class="tab-btn" data-file="js">JS</button>
+                        <button class="tab-btn active" data-file="html">
+                            <span>HTML</span>
+                            <span class="tab-indicator"></span>
+                        </button>
+                        <button class="tab-btn" data-file="css">
+                            <span>CSS</span>
+                            <span class="tab-indicator"></span>
+                        </button>
+                        <button class="tab-btn" data-file="js">
+                            <span>JavaScript</span>
+                            <span class="tab-indicator"></span>
+                        </button>
                     </div>
                     <span class="text-[11px] font-medium opacity-50 uppercase tracking-widest shrink-0" id="current-file">index.html</span>
                 </div>
                 <div class="flex items-center space-x-2 self-end md:self-auto">
-                    <button onclick="Studio.copyCode()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5">Copy</button>
-                    <button onclick="Studio.clearCurrentFile()" class="text-[10px] text-red-400/50 hover:text-red-400 transition px-2 py-1 rounded-md hover:bg-white/5">Clear</button>
-                    <button onclick="Studio.clearAllFiles()" class="clear-all-btn text-[10px] px-2 py-1 rounded-md flex items-center space-x-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
+                    <button onclick="Studio.formatCode()" class="btn btn-xs" title="Format Code (Shift+Alt+F)">
+                        <i class="fas fa-indent"></i>
+                        <span>Format</span>
+                    </button>
+                    <button onclick="Studio.copyCode()" class="btn btn-xs" title="Copy Code">
+                        <i class="fas fa-copy"></i>
+                        <span>Copy</span>
+                    </button>
+                    <button onclick="Studio.clearCurrentFile()" class="btn btn-xs clear-all-btn" title="Clear Current File">
+                        <i class="fas fa-eraser"></i>
+                        <span>Clear</span>
+                    </button>
+                    <button onclick="Studio.clearAllFiles()" class="btn btn-xs clear-all-btn" title="Clear All Files">
+                        <i class="fas fa-trash"></i>
                         <span>Clear All</span>
                     </button>
                 </div>
             </div>
             <div class="glass-panel flex-grow relative">
                 <div class="editor-wrapper">
-                    <textarea id="real-editor" spellcheck="false" placeholder="Start coding..."></textarea>
+                    <textarea id="real-editor" spellcheck="false" placeholder="// Start coding here..."></textarea>
                 </div>
                 <div class="stats-panel hidden md:block">
-                    <span id="line-count">Ln 1</span> • <span id="char-count">Ch 0</span>
+                    <div class="stat-item">
+                        <i class="fas fa-code"></i>
+                        <span id="line-count">Ln 1</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-font"></i>
+                        <span id="char-count">Ch 0</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-file"></i>
+                        <span id="file-size">0 KB</span>
+                    </div>
+                </div>
+                <div class="shortcut-hint hidden md:block">
+                    <span>Shortcuts:</span>
+                    <kbd class="shortcut-key">Tab</kbd>
+                    <kbd class="shortcut-key">Ctrl+S</kbd>
+                    <kbd class="shortcut-key">Ctrl+Z</kbd>
                 </div>
             </div>
         </div>
@@ -449,29 +936,35 @@
             <div class="flex items-center justify-between mb-3 px-2">
                 <div class="flex items-center space-x-2">
                     <span class="w-2 h-2 rounded-full bg-green-500/50 animate-pulse"></span>
-                    <span class="text-[11px] font-medium opacity-50 uppercase tracking-widest">Live Output</span>
+                    <span class="text-[11px] font-medium opacity-50 uppercase tracking-widest">Live Preview</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="Studio.toggleConsole()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5" title="Toggle Console">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
+                    <button onclick="Studio.toggleConsole()" class="btn btn-xs" title="Toggle Console">
+                        <i class="fas fa-terminal"></i>
+                        <span>Console</span>
                     </button>
-                    <button onclick="Studio.forceUpdate()" class="force-update-btn text-[10px] px-3 py-1.5 rounded-md flex items-center space-x-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        <span>Force Update</span>
+                    <button onclick="Studio.forceUpdate()" class="btn btn-xs force-update-btn" title="Force Update">
+                        <i class="fas fa-redo"></i>
+                        <span>Refresh</span>
                     </button>
-                    <button onclick="Studio.toggleFullscreen()" class="text-[10px] opacity-50 hover:opacity-100 transition px-2 py-1 rounded-md hover:bg-white/5">Full</button>
+                    <button onclick="Studio.toggleFullscreen()" class="btn btn-xs" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                        <span>Full</span>
+                    </button>
                 </div>
             </div>
             <div class="glass-panel flex-grow bg-white min-h-[300px] md:min-h-0 relative">
                 <iframe id="preview-frame" class="w-full h-full border-none" title="Live Preview"></iframe>
                 <div id="console-panel" class="console-panel">
                     <div class="console-header flex justify-between items-center p-2 border-b border-[var(--border)]">
-                        <span class="text-xs font-medium">Console</span>
-                        <button onclick="Studio.clearConsole()" class="text-[10px] opacity-50 hover:opacity-100">Clear</button>
+                        <span class="text-xs font-medium">Console Output</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[10px] opacity-50" id="console-count">0 messages</span>
+                            <button onclick="Studio.clearConsole()" class="btn btn-xs">
+                                <i class="fas fa-trash"></i>
+                                <span>Clear</span>
+                            </button>
+                        </div>
                     </div>
                     <div id="console-content"></div>
                 </div>
@@ -480,20 +973,41 @@
     </main>
 
     <div id="ai-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xl hidden z-[100] flex items-center justify-center p-4">
-        <div class="glass-panel max-w-sm w-full p-6 md:p-8 mx-4">
+        <div class="glass-panel max-w-sm w-full p-6 md:p-8 mx-4 animate-slide-in">
             <div class="flex justify-between items-start mb-6">
                 <div>
                     <h3 class="text-lg md:text-xl font-bold">Neural Link</h3>
                     <p class="text-xs opacity-50">Select your logic engine</p>
                 </div>
-                <button onclick="Studio.closeAiModal()" class="text-lg opacity-30 hover:opacity-100">×</button>
+                <button onclick="Studio.closeAiModal()" class="text-lg opacity-30 hover:opacity-100 transition">&times;</button>
             </div>
             <div class="space-y-3">
                 <a href="https://chat.qwen.ai/" target="_blank" class="block p-4 rounded-xl border border-white/5 hover:bg-white/5 transition group">
-                    <div class="flex justify-between items-center text-sm">Qwen 2.5 <span class="group-hover:translate-x-1 transition">→</span></div>
+                    <div class="flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-brain text-purple-400"></i>
+                            <span>Qwen 2.5</span>
+                        </div>
+                        <span class="group-hover:translate-x-1 transition">→</span>
+                    </div>
                 </a>
                 <a href="https://www.deepseek.com/" target="_blank" class="block p-4 rounded-xl border border-white/5 hover:bg-white/5 transition group">
-                    <div class="flex justify-between items-center text-sm">DeepSeek Coder <span class="group-hover:translate-x-1 transition">→</span></div>
+                    <div class="flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-code text-blue-400"></i>
+                            <span>DeepSeek Coder</span>
+                        </div>
+                        <span class="group-hover:translate-x-1 transition">→</span>
+                    </div>
+                </a>
+                <a href="https://chat.openai.com/" target="_blank" class="block p-4 rounded-xl border border-white/5 hover:bg-white/5 transition group">
+                    <div class="flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-robot text-green-400"></i>
+                            <span>ChatGPT</span>
+                        </div>
+                        <span class="group-hover:translate-x-1 transition">→</span>
+                    </div>
                 </a>
             </div>
         </div>
@@ -506,16 +1020,22 @@
             const elements = {
                 editor: document.getElementById('real-editor'),
                 iframe: document.getElementById('preview-frame'),
-                saveBtn: document.getElementById('manual-save-btn'),
+                saveBtn: document.querySelector('.save-btn'),
                 tabButtons: document.querySelectorAll('.tab-btn'),
                 currentFileSpan: document.getElementById('current-file'),
                 lineCountEl: document.getElementById('line-count'),
                 charCountEl: document.getElementById('char-count'),
+                fileSizeEl: document.getElementById('file-size'),
                 consolePanel: document.getElementById('console-panel'),
                 consoleContent: document.getElementById('console-content'),
+                consoleCount: document.getElementById('console-count'),
                 aiModal: document.getElementById('ai-modal'),
                 themeIcon: document.getElementById('theme-icon'),
-                logo: document.getElementById('logo')
+                logo: document.getElementById('logo'),
+                toastContainer: document.getElementById('toast-container'),
+                loadingOverlay: document.getElementById('loading-overlay'),
+                snippetsPanel: document.getElementById('snippets-panel'),
+                snippetsGrid: document.getElementById('snippets-grid')
             };
 
             // Application State
@@ -532,6 +1052,33 @@
                     html: 'index.html',
                     css: 'style.css',
                     js: 'script.js'
+                },
+                codeSnippets: {
+                    html: [
+                        { title: 'Basic HTML5', code: '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Document</title>\n</head>\n<body>\n    \n</body>\n</html>', desc: 'HTML5 boilerplate' },
+                        { title: 'Navbar', code: '<nav>\n    <div class="logo">Logo</div>\n    <ul class="nav-links">\n        <li><a href="#">Home</a></li>\n        <li><a href="#">About</a></li>\n        <li><a href="#">Contact</a></li>\n    </ul>\n</nav>', desc: 'Basic navigation bar' },
+                        { title: 'Card Component', code: '<div class="card">\n    <img src="image.jpg" alt="Card image">\n    <div class="card-content">\n        <h3>Card Title</h3>\n        <p>Card description text goes here.</p>\n        <button>Learn More</button>\n    </div>\n</div>', desc: 'Card component with image' }
+                    ],
+                    css: [
+                        { title: 'Flex Center', code: '.container {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    height: 100vh;\n}', desc: 'Center element with flexbox' },
+                        { title: 'Grid Layout', code: '.grid-container {\n    display: grid;\n    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n    gap: 20px;\n    padding: 20px;\n}', desc: 'Responsive grid layout' },
+                        { title: 'Button Styles', code: '.btn {\n    display: inline-block;\n    padding: 10px 20px;\n    background: #007bff;\n    color: white;\n    border: none;\n    border-radius: 5px;\n    cursor: pointer;\n    transition: background 0.3s;\n}\n\n.btn:hover {\n    background: #0056b3;\n}', desc: 'Button with hover effect' }
+                    ],
+                    js: [
+                        { title: 'Event Listener', code: 'document.addEventListener(\'DOMContentLoaded\', function() {\n    // Your code here\n    console.log(\'DOM loaded\');\n});', desc: 'DOM ready event' },
+                        { title: 'Fetch API', code: 'fetch(\'https://api.example.com/data\')\n    .then(response => response.json())\n    .then(data => {\n        console.log(data);\n    })\n    .catch(error => {\n        console.error(\'Error:\', error);\n    });', desc: 'Fetch data from API' },
+                        { title: 'Form Validation', code: 'function validateForm(form) {\n    const email = form.email.value;\n    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n    \n    if (!emailRegex.test(email)) {\n        alert(\'Please enter a valid email\');\n        return false;\n    }\n    return true;\n}', desc: 'Email validation' }
+                    ]
+                },
+                // Auto-pairing characters
+                autoPairs: {
+                    '(': ')',
+                    '[': ']',
+                    '{': '}',
+                    '"': '"',
+                    "'": "'",
+                    '`': '`',
+                    '<': '>'
                 }
             };
 
@@ -549,21 +1096,241 @@
                     };
                 },
 
-                showNotification(element, text, duration = 2000) {
-                    const originalContent = element.innerHTML;
-                    element.innerHTML = text;
+                showToast(message, type = 'info', duration = 4000) {
+                    const toast = document.createElement('div');
+                    toast.className = `toast toast-${type}`;
+                    
+                    const icons = {
+                        success: 'fas fa-check-circle',
+                        error: 'fas fa-exclamation-circle',
+                        warning: 'fas fa-exclamation-triangle',
+                        info: 'fas fa-info-circle'
+                    };
+                    
+                    toast.innerHTML = `
+                        <div class="toast-icon">
+                            <i class="${icons[type]}"></i>
+                        </div>
+                        <div class="toast-content">${message}</div>
+                        <button class="toast-close" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    elements.toastContainer.appendChild(toast);
+                    
+                    setTimeout(() => toast.classList.add('show'), 10);
+                    
                     setTimeout(() => {
-                        element.innerHTML = originalContent;
+                        if (toast.parentElement) {
+                            toast.classList.remove('show');
+                            setTimeout(() => toast.remove(), 300);
+                        }
                     }, duration);
                 },
 
-                escapeHtml(unsafe) {
-                    return unsafe
-                        .replace(/&/g, "&amp;")
-                        .replace(/</g, "&lt;")
-                        .replace(/>/g, "&gt;")
-                        .replace(/"/g, "&quot;")
-                        .replace(/'/g, "&#039;");
+                showLoading(show) {
+                    elements.loadingOverlay.style.display = show ? 'flex' : 'none';
+                },
+
+                formatBytes(bytes) {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                },
+
+                formatCode(code, language) {
+                    try {
+                        if (language === 'html') {
+                            return code.replace(/(>)(<)(\/*)/g, '$1\n$2$3')
+                                .replace(/^(.*)$/gm, line => line.trim())
+                                .replace(/\n\n/g, '\n');
+                        } else if (language === 'css') {
+                            return code.replace(/\s*{\s*/g, ' {\n    ')
+                                .replace(/;\s*/g, ';\n    ')
+                                .replace(/}\s*/g, '\n}\n\n')
+                                .replace(/\n\s*\n/g, '\n');
+                        } else if (language === 'js') {
+                            return code.replace(/;\s*/g, ';\n')
+                                .replace(/{\s*/g, ' {\n    ')
+                                .replace(/}\s*/g, '\n}\n')
+                                .replace(/\n\s*\n/g, '\n');
+                        }
+                    } catch (e) {
+                        console.error('Formatting error:', e);
+                    }
+                    return code;
+                }
+            };
+
+            // Auto-pairing and smart completion
+            const autoCompleter = {
+                handleKeydown(e) {
+                    const cursorPos = elements.editor.selectionStart;
+                    const nextChar = elements.editor.value.charAt(cursorPos);
+                    
+                    // Handle auto-pairing for brackets, quotes, etc.
+                    if (state.autoPairs[e.key] && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                        e.preventDefault();
+                        
+                        const pairChar = state.autoPairs[e.key];
+                        let insertText = e.key + pairChar;
+                        
+                        // Special handling for quotes - check if we're in the middle of a word
+                        if (e.key === '"' || e.key === "'" || e.key === '`') {
+                            const textBefore = elements.editor.value.substring(0, cursorPos);
+                            const charBefore = textBefore.charAt(textBefore.length - 1);
+                            
+                            // If previous character is a letter, number, or underscore, don't auto-pair
+                            if (/\w/.test(charBefore)) {
+                                insertText = e.key;
+                            }
+                        }
+                        
+                        elements.editor.value = elements.editor.value.substring(0, cursorPos) + 
+                                               insertText + 
+                                               elements.editor.value.substring(cursorPos);
+                        
+                        // Position cursor between the pair
+                        elements.editor.selectionStart = elements.editor.selectionEnd = cursorPos + 1;
+                        
+                        // Trigger update
+                        fileManager.saveCurrentFile();
+                        previewManager.updatePreview();
+                        return;
+                    }
+                    
+                    // Handle Enter key for auto-indentation and auto-closing tags
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        const textBefore = elements.editor.value.substring(0, cursorPos);
+                        const textAfter = elements.editor.value.substring(cursorPos);
+                        const lines = textBefore.split('\n');
+                        const currentLine = lines[lines.length - 1];
+                        
+                        // Check if we need to auto-close HTML tags
+                        if (state.currentFile === 'html') {
+                            const tagMatch = currentLine.match(/<(\w+)[^>]*>$/);
+                            if (tagMatch && !currentLine.includes('</')) {
+                                const tagName = tagMatch[1];
+                                const indent = currentLine.match(/^\s*/)[0];
+                                
+                                e.preventDefault();
+                                
+                                const closingTag = `</${tagName}>`;
+                                const newText = textBefore + '\n' + indent + '    \n' + indent + closingTag + textAfter;
+                                elements.editor.value = newText;
+                                
+                                // Position cursor on the new line with indentation
+                                const newCursorPos = cursorPos + 1 + indent.length + 4;
+                                elements.editor.selectionStart = elements.editor.selectionEnd = newCursorPos;
+                                
+                                // Trigger update
+                                fileManager.saveCurrentFile();
+                                previewManager.updatePreview();
+                                return;
+                            }
+                        }
+                        
+                        // Auto-indentation for CSS and JS
+                        if (state.currentFile === 'css' || state.currentFile === 'js') {
+                            const openBraces = (currentLine.match(/{/g) || []).length;
+                            const closeBraces = (currentLine.match(/}/g) || []).length;
+                            
+                            if (openBraces > closeBraces) {
+                                const indent = currentLine.match(/^\s*/)[0];
+                                const extraIndent = '    ';
+                                
+                                e.preventDefault();
+                                
+                                const newText = textBefore + '\n' + indent + extraIndent + '\n' + indent + textAfter;
+                                elements.editor.value = newText;
+                                
+                                // Position cursor on the new indented line
+                                const newCursorPos = cursorPos + 1 + indent.length + extraIndent.length;
+                                elements.editor.selectionStart = elements.editor.selectionEnd = newCursorPos;
+                                
+                                // Trigger update
+                                fileManager.saveCurrentFile();
+                                previewManager.updatePreview();
+                                return;
+                            }
+                        }
+                    }
+                    
+                    // Handle closing character jumping
+                    if ((e.key === ')' || e.key === ']' || e.key === '}' || e.key === '"' || e.key === "'" || e.key === '`' || e.key === '>') && 
+                        nextChar === e.key && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                        e.preventDefault();
+                        elements.editor.selectionStart = elements.editor.selectionEnd = cursorPos + 1;
+                        return;
+                    }
+                    
+                    // Handle backspace for paired characters
+                    if (e.key === 'Backspace' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                        const textBefore = elements.editor.value.substring(0, cursorPos);
+                        const textAfter = elements.editor.value.substring(cursorPos);
+                        const charBefore = textBefore.charAt(textBefore.length - 1);
+                        const charAfter = textAfter.charAt(0);
+                        
+                        // Check if we have a paired character
+                        if (charAfter && state.autoPairs[charBefore] === charAfter) {
+                            e.preventDefault();
+                            elements.editor.value = textBefore.substring(0, textBefore.length - 1) + textAfter.substring(1);
+                            elements.editor.selectionStart = elements.editor.selectionEnd = cursorPos - 1;
+                            
+                            // Trigger update
+                            fileManager.saveCurrentFile();
+                            previewManager.updatePreview();
+                            return;
+                        }
+                    }
+                },
+                
+                handleInput(e) {
+                    // Check for special patterns that should trigger auto-completion
+                    const cursorPos = elements.editor.selectionStart;
+                    const textBefore = elements.editor.value.substring(0, cursorPos);
+                    const lastChar = textBefore.charAt(textBefore.length - 1);
+                    
+                    // Auto-close braces in CSS/JS
+                    if (state.currentFile === 'css' || state.currentFile === 'js') {
+                        if (lastChar === '{') {
+                            setTimeout(() => {
+                                const currentPos = elements.editor.selectionStart;
+                                const textAfter = elements.editor.value.substring(currentPos);
+                                
+                                // Only add closing brace if not already there
+                                if (!textAfter.startsWith('}')) {
+                                    elements.editor.value = elements.editor.value.substring(0, currentPos) + '}' + elements.editor.value.substring(currentPos);
+                                    elements.editor.selectionStart = elements.editor.selectionEnd = currentPos;
+                                    
+                                    // Trigger update
+                                    fileManager.saveCurrentFile();
+                                    previewManager.updatePreview();
+                                }
+                            }, 10);
+                        }
+                    }
+                    
+                    // Auto-close HTML comments
+                    if (state.currentFile === 'html' && textBefore.endsWith('<!--')) {
+                        setTimeout(() => {
+                            const currentPos = elements.editor.selectionStart;
+                            const textAfter = elements.editor.value.substring(currentPos);
+                            
+                            // Only add closing comment if not already there
+                            if (!textAfter.startsWith('-->')) {
+                                elements.editor.value = elements.editor.value.substring(0, currentPos) + ' -->' + elements.editor.value.substring(currentPos);
+                                elements.editor.selectionStart = elements.editor.selectionEnd = currentPos;
+                                
+                                // Trigger update
+                                fileManager.saveCurrentFile();
+                                previewManager.updatePreview();
+                            }
+                        }, 10);
+                    }
                 }
             };
 
@@ -579,6 +1346,7 @@
                         localStorage.setItem('studio_files', JSON.stringify(state.files));
                     } catch (e) {
                         console.error('Failed to save to localStorage:', e);
+                        utils.showToast('Failed to save: Storage quota exceeded', 'error');
                     }
                 },
 
@@ -601,6 +1369,7 @@
                         previewManager.updatePreview();
                         this.saveToStorage();
                         statsManager.updateStats();
+                        utils.showToast('File cleared', 'success');
                     }
                 },
 
@@ -618,11 +1387,7 @@
                         this.saveToStorage();
                         statsManager.updateStats();
                         
-                        // Show notification
-                        utils.showNotification(
-                            document.querySelector('.clear-all-btn'),
-                            `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>Cleared</span>`
-                        );
+                        utils.showToast('All files cleared', 'success');
                     }
                 },
 
@@ -634,6 +1399,10 @@
                     // Update UI
                     elements.tabButtons.forEach(btn => {
                         btn.classList.toggle('active', btn.dataset.file === fileType);
+                        const indicator = btn.querySelector('.tab-indicator');
+                        if (indicator) {
+                            indicator.style.opacity = btn.dataset.file === fileType ? '1' : '0';
+                        }
                     });
                     
                     elements.currentFileSpan.textContent = state.fileNames[fileType];
@@ -650,11 +1419,63 @@
                 copyCode() {
                     navigator.clipboard.writeText(elements.editor.value)
                         .then(() => {
-                            alert("Code copied to clipboard!");
+                            utils.showToast('Code copied to clipboard', 'success');
                         })
                         .catch(err => {
                             console.error('Failed to copy:', err);
+                            utils.showToast('Failed to copy to clipboard', 'error');
                         });
+                },
+
+                formatCode() {
+                    const formatted = utils.formatCode(elements.editor.value, state.currentFile);
+                    if (formatted !== elements.editor.value) {
+                        elements.editor.value = formatted;
+                        this.saveCurrentFile();
+                        previewManager.updatePreview();
+                        utils.showToast('Code formatted', 'success');
+                    }
+                },
+
+                exportProject() {
+                    utils.showLoading(true);
+                    
+                    const htmlContent = state.files.html || '';
+                    const cssContent = state.files.css || '';
+                    const jsContent = state.files.js || '';
+                    
+                    const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exported Project</title>
+    <style>
+${cssContent}
+    </style>
+</head>
+<body>
+${htmlContent}
+    <script>
+${jsContent}
+    <\/script>
+</body>
+</html>`;
+                    
+                    const blob = new Blob([fullHtml], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'project-export.html';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    setTimeout(() => {
+                        utils.showLoading(false);
+                        utils.showToast('Project exported successfully', 'success');
+                    }, 500);
                 }
             };
 
@@ -667,10 +1488,6 @@
                     
                     const doc = elements.iframe.contentDocument;
                     if (!doc) return;
-                    
-                    // Clear console
-                    state.consoleMessages = [];
-                    consoleManager.updateConsoleDisplay();
                     
                     doc.open();
                     
@@ -715,7 +1532,7 @@
                         try {
                             ${state.files.js}
                         } catch(e) {
-                            console.error('JavaScript Error:', e.message);
+                            console.error('JavaScript Error:', e.message, '\\nStack:', e.stack);
                         }
                     `;
                     
@@ -726,14 +1543,10 @@
                     state.consoleMessages = [];
                     consoleManager.updateConsoleDisplay();
                     
-                    // Force iframe reload
                     elements.iframe.src = 'about:blank';
                     setTimeout(() => {
                         this.updatePreview();
-                        utils.showNotification(
-                            document.querySelector('.force-update-btn'),
-                            `<span>✓ Updated</span>`
-                        );
+                        utils.showToast('Preview refreshed', 'success');
                     }, 50);
                 }
             };
@@ -748,13 +1561,30 @@
                 clearConsole() {
                     state.consoleMessages = [];
                     this.updateConsoleDisplay();
+                    utils.showToast('Console cleared', 'success');
                 },
 
                 updateConsoleDisplay() {
                     elements.consoleContent.innerHTML = state.consoleMessages
-                        .map(msg => `<div class="console-item console-${msg.method}">> ${msg.args.join(' ')}</div>`)
+                        .map(msg => {
+                            const time = msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            const icon = msg.method === 'error' ? 'fas fa-times-circle' :
+                                        msg.method === 'warn' ? 'fas fa-exclamation-triangle' :
+                                        msg.method === 'info' ? 'fas fa-info-circle' : 'fas fa-terminal';
+                            
+                            return `
+                                <div class="console-item console-${msg.method}">
+                                    <div class="console-icon">
+                                        <i class="${icon}"></i>
+                                    </div>
+                                    <div class="console-content">${msg.args.join(' ')}</div>
+                                    <div class="console-time">${time}</div>
+                                </div>
+                            `;
+                        })
                         .join('');
                     
+                    elements.consoleCount.textContent = `${state.consoleMessages.length} message${state.consoleMessages.length !== 1 ? 's' : ''}`;
                     elements.consoleContent.scrollTop = elements.consoleContent.scrollHeight;
                 },
 
@@ -765,7 +1595,7 @@
                         timestamp: new Date()
                     });
                     
-                    if (state.consoleMessages.length > 50) {
+                    if (state.consoleMessages.length > 100) {
                         state.consoleMessages.shift();
                     }
                     
@@ -779,9 +1609,51 @@
                     const text = elements.editor.value;
                     const lines = text.split('\n').length;
                     const chars = text.length;
+                    const size = new Blob([text]).size;
                     
                     elements.lineCountEl.textContent = `Ln ${lines}`;
                     elements.charCountEl.textContent = `Ch ${chars}`;
+                    elements.fileSizeEl.textContent = utils.formatBytes(size);
+                }
+            };
+
+            // Snippets Management
+            const snippetsManager = {
+                showSnippets() {
+                    elements.snippetsPanel.style.display = 'block';
+                    this.loadSnippets();
+                },
+
+                closeSnippets() {
+                    elements.snippetsPanel.style.display = 'none';
+                },
+
+                loadSnippets() {
+                    const snippets = state.codeSnippets[state.currentFile] || [];
+                    elements.snippetsGrid.innerHTML = '';
+                    
+                    if (snippets.length === 0) {
+                        elements.snippetsGrid.innerHTML = '<p class="text-center opacity-50 py-4">No snippets available for this file type</p>';
+                        return;
+                    }
+                    
+                    snippets.forEach(snippet => {
+                        const div = document.createElement('div');
+                        div.className = 'snippet-item';
+                        div.innerHTML = `
+                            <div class="snippet-title">${snippet.title}</div>
+                            <div class="snippet-desc">${snippet.desc}</div>
+                        `;
+                        div.onclick = () => {
+                            elements.editor.value += '\n' + snippet.code;
+                            fileManager.saveCurrentFile();
+                            previewManager.updatePreview();
+                            statsManager.updateStats();
+                            this.closeSnippets();
+                            utils.showToast(`"${snippet.title}" snippet inserted`, 'success');
+                        };
+                        elements.snippetsGrid.appendChild(div);
+                    });
                 }
             };
 
@@ -791,14 +1663,11 @@
                     document.documentElement.classList.toggle('light-mode');
                     const isLight = document.documentElement.classList.contains('light-mode');
                     
-                    // Update theme icon
                     elements.themeIcon.innerHTML = isLight ? 
                         `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>` :
                         `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`;
                     
-                    // Update logo color through CSS variable
-                    // The color is already handled by CSS variable --logo-fill
-                    // All circles have class .logo-circle that inherits from --logo-fill
+                    utils.showToast(`Switched to ${isLight ? 'light' : 'dark'} theme`, 'info');
                 },
 
                 openAiModal() {
@@ -823,10 +1692,7 @@
 
                 manualSave() {
                     fileManager.saveToStorage();
-                    utils.showNotification(
-                        elements.saveBtn,
-                        `<svg class="w-3 h-3 md:w-4 md:h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="hidden md:inline">Saved</span>`
-                    );
+                    utils.showToast('Project saved locally', 'success');
                 }
             };
 
@@ -843,22 +1709,51 @@
                         previewManager.updatePreview();
                     });
 
-                    // Input handling with debouncing
-                    elements.editor.addEventListener('input', () => {
+                    // Input handling
+                    elements.editor.addEventListener('input', (e) => {
                         previewManager.updatePreview();
                         statsManager.updateStats();
+                        
+                        // Handle auto-pairing and smart completion
+                        autoCompleter.handleInput(e);
                     });
 
-                    // Tab key handling
+                    // Keydown handling
                     elements.editor.addEventListener('keydown', (e) => {
+                        // Handle auto-pairing first
+                        autoCompleter.handleKeydown(e);
+                        
                         if (e.key === 'Tab') {
                             e.preventDefault();
                             this.handleTabKey();
                         }
                         
+                        // Format code with Shift+Alt+F
+                        if (e.shiftKey && e.altKey && e.key === 'F') {
+                            e.preventDefault();
+                            fileManager.formatCode();
+                        }
+                        
+                        // Save with Ctrl+S
                         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                             e.preventDefault();
                             uiManager.manualSave();
+                        }
+                        
+                        // Undo with Ctrl+Z
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                            setTimeout(() => {
+                                fileManager.saveCurrentFile();
+                                previewManager.updatePreview();
+                            }, 10);
+                        }
+                        
+                        // Redo with Ctrl+Y or Ctrl+Shift+Z
+                        if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+                            setTimeout(() => {
+                                fileManager.saveCurrentFile();
+                                previewManager.updatePreview();
+                            }, 10);
                         }
                     });
 
@@ -876,11 +1771,29 @@
                     const start = elements.editor.selectionStart;
                     const end = elements.editor.selectionEnd;
                     
-                    elements.editor.value = elements.editor.value.substring(0, start) + 
-                                           "    " + 
-                                           elements.editor.value.substring(end);
+                    const selectedText = elements.editor.value.substring(start, end);
                     
-                    elements.editor.selectionStart = elements.editor.selectionEnd = start + 4;
+                    if (selectedText.length > 0 && selectedText.includes('\n')) {
+                        // Multiple lines selected - indent all lines
+                        const lines = selectedText.split('\n');
+                        const indentedLines = lines.map(line => '    ' + line);
+                        const newText = indentedLines.join('\n');
+                        
+                        elements.editor.value = elements.editor.value.substring(0, start) + 
+                                               newText + 
+                                               elements.editor.value.substring(end);
+                        
+                        elements.editor.selectionStart = start;
+                        elements.editor.selectionEnd = start + newText.length;
+                    } else {
+                        // Single line or no selection - insert 4 spaces
+                        elements.editor.value = elements.editor.value.substring(0, start) + 
+                                               "    " + 
+                                               elements.editor.value.substring(end);
+                        
+                        elements.editor.selectionStart = elements.editor.selectionEnd = start + 4;
+                    }
+                    
                     previewManager.updatePreview();
                     statsManager.updateStats();
                 },
@@ -889,19 +1802,18 @@
                     elements.tabButtons.forEach(btn => {
                         btn.addEventListener('click', () => {
                             fileManager.switchFile(btn.dataset.file);
+                            snippetsManager.loadSnippets();
                         });
                     });
                 },
 
                 setupWindowEvents() {
-                    // Console message listener
                     window.addEventListener('message', (event) => {
                         if (event.data.type === 'console') {
                             consoleManager.handleConsoleMessage(event.data);
                         }
                     });
 
-                    // Window resize handler
                     window.addEventListener('resize', () => {
                         if (elements.editor) {
                             elements.editor.style.height = 'auto';
@@ -910,10 +1822,19 @@
                             }, 50);
                         }
                     });
+
+                    document.addEventListener('fullscreenchange', () => {
+                        if (!document.fullscreenElement) {
+                            elements.iframe.style.height = '100%';
+                        }
+                    });
+
+                    setTimeout(() => {
+                        utils.showToast('Garage Code Editor v2.3 loaded successfully!', 'success');
+                    }, 1000);
                 }
             };
 
-            // Public API
             return {
                 init() {
                     fileManager.loadFromStorage();
@@ -924,26 +1845,37 @@
                     eventHandlers.setupEditorEvents();
                     eventHandlers.setupTabEvents();
                     eventHandlers.setupWindowEvents();
+                    
+                    snippetsManager.loadSnippets();
                 },
 
-                // Expose public methods
                 toggleTheme: uiManager.toggleTheme,
                 openAiModal: uiManager.openAiModal,
                 closeAiModal: uiManager.closeAiModal,
                 toggleFullscreen: uiManager.toggleFullscreen,
                 manualSave: uiManager.manualSave,
-                forceUpdate: previewManager.forceUpdate,
+                forceUpdate: previewManager.forceUpdate.bind(previewManager),
                 copyCode: fileManager.copyCode,
                 clearCurrentFile: fileManager.clearCurrentFile,
                 clearAllFiles: fileManager.clearAllFiles,
                 toggleConsole: consoleManager.toggleConsole,
-                clearConsole: consoleManager.clearConsole
+                clearConsole: consoleManager.clearConsole,
+                formatCode: fileManager.formatCode,
+                exportProject: fileManager.exportProject,
+                showToast: utils.showToast,
+                showSnippets: snippetsManager.showSnippets.bind(snippetsManager),
+                closeSnippets: snippetsManager.closeSnippets.bind(snippetsManager),
+                showLoading: utils.showLoading
             };
         })();
 
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
             Studio.init();
+        });
+
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            Studio.showToast(`Error: ${e.message}`, 'error');
         });
     </script>
 </body>
