@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adele Labs | Studio Editor v2.3</title>
+    <title>Garage Code | Web Editor v2.3</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -423,72 +423,7 @@
             transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* TOAST NOTIFICATION */
-        .toast-container {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .toast {
-            padding: 12px 20px;
-            border-radius: 12px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transform: translateX(120%);
-            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            max-width: 350px;
-            backdrop-filter: blur(10px);
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast-icon {
-            flex-shrink: 0;
-            font-size: 18px;
-        }
-
-        .toast-success .toast-icon { color: var(--success); }
-        .toast-error .toast-icon { color: var(--error); }
-        .toast-warning .toast-icon { color: var(--warning); }
-        .toast-info .toast-icon { color: var(--secondary); }
-
-        .toast-content {
-            flex-grow: 1;
-            font-size: 14px;
-        }
-
-        .toast-close {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .toast-close:hover {
-            background: rgba(0,0,0,0.05);
-            color: var(--text);
-        }
-
-        .light-mode .toast-close:hover {
-            background: rgba(0,0,0,0.05);
-        }
+        /* REMOVED TOAST NOTIFICATION STYLES */
 
         /* LOADING INDICATOR */
         .loading-overlay {
@@ -620,6 +555,37 @@
             opacity: 0.7;
         }
 
+        /* FULLSCREEN STYLES */
+        .fullscreen-exit-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .fullscreen-exit-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: var(--accent);
+        }
+
+        body:fullscreen .fullscreen-exit-btn,
+        body:-webkit-full-screen .fullscreen-exit-btn,
+        body:-moz-full-screen .fullscreen-exit-btn {
+            display: flex;
+        }
+
         /* MOBILE OPTIMIZATION */
         @media (max-width: 768px) {
             body {
@@ -644,7 +610,7 @@
 
             .grid-layout {
                 grid-template-columns: 1fr;
-                padding: 16px;
+                padding: 16px 206px;
                 gap: 16px;
                 height: auto;
                 min-height: calc(100vh - 60px);
@@ -653,6 +619,17 @@
             .glass-panel {
                 height: 400px;
                 min-height: 400px;
+            }
+
+            /* ADDED PADDING FOR PREVIEW ON MOBILE */
+            .preview-container {
+                position: relative;
+                height: 100%;
+                padding-bottom: 20px; /* Added padding at bottom */
+            }
+
+            #preview-frame {
+                height: calc(100% - 20px); /* Adjust height to account for padding */
             }
 
             #real-editor {
@@ -686,15 +663,7 @@
                 left: 20px;
             }
 
-            .toast-container {
-                top: 70px;
-                right: 10px;
-                left: 10px;
-            }
-
-            .toast {
-                max-width: 100%;
-            }
+            /* REMOVED TOAST CONTAINER */
         }
 
         @media (max-width: 480px) {
@@ -790,13 +759,16 @@
         <div class="bokeh-ball-secondary"></div>
     </div>
 
+    <!-- Fullscreen Exit Button -->
+    <button id="fullscreen-exit-btn" class="fullscreen-exit-btn" onclick="Studio.exitFullscreen()">
+        <i class="fas fa-compress"></i>
+        <span>Exit Fullscreen</span>
+    </button>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner"></div>
     </div>
-
-    <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
 
     <!-- Code Snippets Panel -->
     <div id="snippets-panel" class="snippets-panel glass-panel">
@@ -811,7 +783,7 @@
 
     <nav class="h-20 flex items-center justify-between px-4 md:px-8 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md z-50 sticky top-0">
         <div class="flex items-center space-x-4 md:space-x-6">
-            <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity" onclick="Studio.showToast('Welcome to Garage Code Editor!', 'info')">
+            <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
                 <svg id="logo" class="logo-svg w-full h-full" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle class="logo-circle" cx="8.52841" cy="15" r="2.84286"/>
                     <circle class="logo-circle" cx="2.84286" cy="15" r="2.84286"/>
@@ -870,7 +842,7 @@
         <div class="flex flex-col h-full">
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-3 px-2 gap-2">
                 <div class="flex items-center space-x-2 md:space-x-4 w-full md:w-auto">
-                    <div class="flex space-x-1 overflow-x-auto">
+                    <div class="flex space-x-1  ">
                         <button class="tab-btn active" data-file="html">
                             <span>HTML</span>
                             <span class="tab-indicator"></span>
@@ -953,7 +925,8 @@
                     </button>
                 </div>
             </div>
-            <div class="glass-panel flex-grow bg-white min-h-[300px] md:min-h-0 relative">
+            <!-- Added preview-container div for mobile padding -->
+            <div class="glass-panel flex-grow bg-white min-h-[300px] md:min-h-0 relative preview-container">
                 <iframe id="preview-frame" class="w-full h-full border-none" title="Live Preview"></iframe>
                 <div id="console-panel" class="console-panel">
                     <div class="console-header flex justify-between items-center p-2 border-b border-[var(--border)]">
@@ -1032,10 +1005,10 @@
                 aiModal: document.getElementById('ai-modal'),
                 themeIcon: document.getElementById('theme-icon'),
                 logo: document.getElementById('logo'),
-                toastContainer: document.getElementById('toast-container'),
                 loadingOverlay: document.getElementById('loading-overlay'),
                 snippetsPanel: document.getElementById('snippets-panel'),
-                snippetsGrid: document.getElementById('snippets-grid')
+                snippetsGrid: document.getElementById('snippets-grid'),
+                fullscreenExitBtn: document.getElementById('fullscreen-exit-btn')
             };
 
             // Application State
@@ -1079,7 +1052,8 @@
                     "'": "'",
                     '`': '`',
                     '<': '>'
-                }
+                },
+                isFullscreen: false
             };
 
             // Utility Functions
@@ -1094,39 +1068,6 @@
                         clearTimeout(timeout);
                         timeout = setTimeout(later, wait);
                     };
-                },
-
-                showToast(message, type = 'info', duration = 4000) {
-                    const toast = document.createElement('div');
-                    toast.className = `toast toast-${type}`;
-                    
-                    const icons = {
-                        success: 'fas fa-check-circle',
-                        error: 'fas fa-exclamation-circle',
-                        warning: 'fas fa-exclamation-triangle',
-                        info: 'fas fa-info-circle'
-                    };
-                    
-                    toast.innerHTML = `
-                        <div class="toast-icon">
-                            <i class="${icons[type]}"></i>
-                        </div>
-                        <div class="toast-content">${message}</div>
-                        <button class="toast-close" onclick="this.parentElement.remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    
-                    elements.toastContainer.appendChild(toast);
-                    
-                    setTimeout(() => toast.classList.add('show'), 10);
-                    
-                    setTimeout(() => {
-                        if (toast.parentElement) {
-                            toast.classList.remove('show');
-                            setTimeout(() => toast.remove(), 300);
-                        }
-                    }, duration);
                 },
 
                 showLoading(show) {
@@ -1346,7 +1287,6 @@
                         localStorage.setItem('studio_files', JSON.stringify(state.files));
                     } catch (e) {
                         console.error('Failed to save to localStorage:', e);
-                        utils.showToast('Failed to save: Storage quota exceeded', 'error');
                     }
                 },
 
@@ -1369,7 +1309,6 @@
                         previewManager.updatePreview();
                         this.saveToStorage();
                         statsManager.updateStats();
-                        utils.showToast('File cleared', 'success');
                     }
                 },
 
@@ -1386,8 +1325,6 @@
                         previewManager.updatePreview();
                         this.saveToStorage();
                         statsManager.updateStats();
-                        
-                        utils.showToast('All files cleared', 'success');
                     }
                 },
 
@@ -1419,11 +1356,10 @@
                 copyCode() {
                     navigator.clipboard.writeText(elements.editor.value)
                         .then(() => {
-                            utils.showToast('Code copied to clipboard', 'success');
+                            console.log('Code copied to clipboard');
                         })
                         .catch(err => {
                             console.error('Failed to copy:', err);
-                            utils.showToast('Failed to copy to clipboard', 'error');
                         });
                 },
 
@@ -1433,7 +1369,6 @@
                         elements.editor.value = formatted;
                         this.saveCurrentFile();
                         previewManager.updatePreview();
-                        utils.showToast('Code formatted', 'success');
                     }
                 },
 
@@ -1474,7 +1409,6 @@ ${jsContent}
                     
                     setTimeout(() => {
                         utils.showLoading(false);
-                        utils.showToast('Project exported successfully', 'success');
                     }, 500);
                 }
             };
@@ -1487,7 +1421,14 @@ ${jsContent}
                     fileManager.saveCurrentFile();
                     
                     const doc = elements.iframe.contentDocument;
-                    if (!doc) return;
+                    if (!doc) {
+                        // If iframe doesn't have a document yet, set src to about:blank first
+                        elements.iframe.src = 'about:blank';
+                        setTimeout(() => {
+                            this.updatePreview();
+                        }, 50);
+                        return;
+                    }
                     
                     doc.open();
                     
@@ -1497,7 +1438,15 @@ ${jsContent}
                         <head>
                             <meta charset="UTF-8">
                             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <style>${state.files.css || ''}</style>
+                            <style>
+                                body {
+                                    margin: 0;
+                                    padding: 20px;
+                                    min-height: 100vh;
+                                    box-sizing: border-box;
+                                }
+                                ${state.files.css || ''}
+                            </style>
                         </head>
                         <body>
                             ${state.files.html || ''}
@@ -1546,7 +1495,6 @@ ${jsContent}
                     elements.iframe.src = 'about:blank';
                     setTimeout(() => {
                         this.updatePreview();
-                        utils.showToast('Preview refreshed', 'success');
                     }, 50);
                 }
             };
@@ -1561,7 +1509,6 @@ ${jsContent}
                 clearConsole() {
                     state.consoleMessages = [];
                     this.updateConsoleDisplay();
-                    utils.showToast('Console cleared', 'success');
                 },
 
                 updateConsoleDisplay() {
@@ -1650,10 +1597,63 @@ ${jsContent}
                             previewManager.updatePreview();
                             statsManager.updateStats();
                             this.closeSnippets();
-                            utils.showToast(`"${snippet.title}" snippet inserted`, 'success');
                         };
                         elements.snippetsGrid.appendChild(div);
                     });
+                }
+            };
+
+            // Fullscreen Management
+            const fullscreenManager = {
+                toggleFullscreen() {
+                    if (!document.fullscreenElement) {
+                        this.enterFullscreen();
+                    } else {
+                        this.exitFullscreen();
+                    }
+                },
+
+                enterFullscreen() {
+                    const elem = elements.iframe.parentElement.parentElement; // Get the preview section
+                    
+                    if (elem.requestFullscreen) {
+                        elem.requestFullscreen();
+                    } else if (elem.webkitRequestFullscreen) {
+                        elem.webkitRequestFullscreen();
+                    } else if (elem.mozRequestFullScreen) {
+                        elem.mozRequestFullScreen();
+                    } else if (elem.msRequestFullscreen) {
+                        elem.msRequestFullscreen();
+                    }
+                    
+                    state.isFullscreen = true;
+                },
+
+                exitFullscreen() {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                    
+                    state.isFullscreen = false;
+                },
+
+                handleFullscreenChange() {
+                    state.isFullscreen = !!document.fullscreenElement;
+                    
+                    // Ensure iframe is properly sized in fullscreen
+                    if (state.isFullscreen) {
+                        elements.iframe.style.height = '100%';
+                        elements.iframe.style.width = '100%';
+                    } else {
+                        elements.iframe.style.height = '100%';
+                        elements.iframe.style.width = '100%';
+                    }
                 }
             };
 
@@ -1666,8 +1666,6 @@ ${jsContent}
                     elements.themeIcon.innerHTML = isLight ? 
                         `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>` :
                         `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`;
-                    
-                    utils.showToast(`Switched to ${isLight ? 'light' : 'dark'} theme`, 'info');
                 },
 
                 openAiModal() {
@@ -1678,21 +1676,11 @@ ${jsContent}
                     elements.aiModal.classList.add('hidden');
                 },
 
-                toggleFullscreen() {
-                    if (!document.fullscreenElement) {
-                        elements.iframe.requestFullscreen?.() || 
-                        elements.iframe.webkitRequestFullscreen?.() || 
-                        elements.iframe.mozRequestFullScreen?.();
-                    } else {
-                        document.exitFullscreen?.() || 
-                        document.webkitExitFullscreen?.() || 
-                        document.mozCancelFullScreen?.();
-                    }
-                },
+                toggleFullscreen: fullscreenManager.toggleFullscreen.bind(fullscreenManager),
+                exitFullscreen: fullscreenManager.exitFullscreen.bind(fullscreenManager),
 
                 manualSave() {
                     fileManager.saveToStorage();
-                    utils.showToast('Project saved locally', 'success');
                 }
             };
 
@@ -1823,15 +1811,29 @@ ${jsContent}
                         }
                     });
 
+                    // Fullscreen event listeners
                     document.addEventListener('fullscreenchange', () => {
-                        if (!document.fullscreenElement) {
-                            elements.iframe.style.height = '100%';
-                        }
+                        fullscreenManager.handleFullscreenChange();
                     });
 
-                    setTimeout(() => {
-                        utils.showToast('Garage Code Editor v2.3 loaded successfully!', 'success');
-                    }, 1000);
+                    document.addEventListener('webkitfullscreenchange', () => {
+                        fullscreenManager.handleFullscreenChange();
+                    });
+
+                    document.addEventListener('mozfullscreenchange', () => {
+                        fullscreenManager.handleFullscreenChange();
+                    });
+
+                    document.addEventListener('MSFullscreenChange', () => {
+                        fullscreenManager.handleFullscreenChange();
+                    });
+
+                    // Add keyboard shortcut for exiting fullscreen
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && state.isFullscreen) {
+                            fullscreenManager.exitFullscreen();
+                        }
+                    });
                 }
             };
 
@@ -1853,6 +1855,7 @@ ${jsContent}
                 openAiModal: uiManager.openAiModal,
                 closeAiModal: uiManager.closeAiModal,
                 toggleFullscreen: uiManager.toggleFullscreen,
+                exitFullscreen: uiManager.exitFullscreen,
                 manualSave: uiManager.manualSave,
                 forceUpdate: previewManager.forceUpdate.bind(previewManager),
                 copyCode: fileManager.copyCode,
@@ -1862,7 +1865,6 @@ ${jsContent}
                 clearConsole: consoleManager.clearConsole,
                 formatCode: fileManager.formatCode,
                 exportProject: fileManager.exportProject,
-                showToast: utils.showToast,
                 showSnippets: snippetsManager.showSnippets.bind(snippetsManager),
                 closeSnippets: snippetsManager.closeSnippets.bind(snippetsManager),
                 showLoading: utils.showLoading
@@ -1875,7 +1877,6 @@ ${jsContent}
 
         window.addEventListener('error', (e) => {
             console.error('Global error:', e.error);
-            Studio.showToast(`Error: ${e.message}`, 'error');
         });
     </script>
 </body>
